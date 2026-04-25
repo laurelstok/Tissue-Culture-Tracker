@@ -7,7 +7,7 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F5F4F1;color:#1A1915;font-size:14px}
-:root{--bg:#fff;--bg2:#F5F4F1;--bd:#E3E1DB;--bd2:#C8C6BF;--tx:#1A1915;--tx2:#6B6A65;--green:#3B6D11;--gl:#EAF3DE;--blue:#185FA5;--bl:#E6F1FB;--r:6px;--rl:10px}
+:root{--bg:#fff;--bg2:#F5F4F1;--bd:#E3E1DB;--bd2:#C8C6BF;--tx:#1A1915;--tx2:#6B6A65;--green:#3B6D11;--gl:#EAF3DE;--blue:#185FA5;--bl:#E6F1FB;--red:#A32D2D;--rl:#FCEBEB;--r:6px;--rl2:10px}
 .app{min-height:100vh;max-width:1200px;margin:0 auto;background:var(--bg);box-shadow:0 0 0 0.5px var(--bd)}
 .tab-bar{display:flex;gap:4px;padding:8px 12px;border-bottom:0.5px solid var(--bd);background:var(--bg2);flex-wrap:wrap;align-items:center}
 .tab{padding:5px 13px;font-size:13px;border:0.5px solid var(--bd);border-radius:var(--r);cursor:pointer;color:var(--tx2);background:var(--bg)}
@@ -26,25 +26,33 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .btn{font-size:12px;border:0.5px solid var(--bd2);border-radius:var(--r);padding:5px 11px;background:var(--bg);color:var(--tx);cursor:pointer;white-space:nowrap;font-family:inherit}
 .btn:hover{background:var(--bg2)}
 .btn-p{background:var(--tx)!important;color:var(--bg)!important;border-color:var(--tx)!important}
-.btn-d{border-color:#A32D2D!important;color:#A32D2D!important}.btn-d:hover{background:#FCEBEB!important}
+.btn-d{border-color:var(--red)!important;color:var(--red)!important}.btn-d:hover{background:var(--rl)!important}
 .btn-ok{border-color:var(--green)!important;color:var(--green)!important;background:var(--gl)!important}
+.btn-blue{border-color:var(--blue)!important;color:var(--blue)!important;background:var(--bl)!important}
+.btn-red{border-color:var(--red)!important;color:var(--red)!important}.btn-red:hover{background:var(--rl)!important}
+.btn-sm{font-size:11px;padding:3px 8px}
+.plate-btn{font-size:11px;padding:2px 8px;border:0.5px solid var(--blue);border-radius:10px;background:var(--bl);color:var(--blue);cursor:pointer;font-family:inherit;white-space:nowrap}
+.plate-btn:hover{background:var(--blue);color:#fff}
+.sci-btn{font-size:10px;padding:2px 6px;border:0.5px solid var(--bd2);border-radius:4px;background:var(--bg2);color:var(--tx2);cursor:pointer;font-family:inherit;margin-left:4px;flex-shrink:0}
+.sci-btn:hover{background:var(--tx);color:var(--bg)}
+.sci-preview{font-size:11px;color:var(--green);margin-top:3px;font-family:monospace;min-height:16px}
 .iopanel{padding:14px 16px}
-.iosec{background:var(--bg);border:0.5px solid var(--bd);border-radius:var(--rl);padding:14px;margin-bottom:12px}
+.iosec{background:var(--bg);border:0.5px solid var(--bd);border-radius:var(--rl2);padding:14px;margin-bottom:12px}
 .iotitle{font-size:13px;font-weight:500;margin-bottom:4px}
 .iodesc{font-size:12px;color:var(--tx2);margin-bottom:10px;line-height:1.6}
 .iodesc code,.gst code{font-family:monospace;font-size:11px;background:var(--bg2);padding:1px 5px;border-radius:4px}
 .iorow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .iofn{font-family:monospace;font-size:11px;color:var(--tx2);padding:5px 8px;border:0.5px solid var(--bd);border-radius:var(--r);background:var(--bg2)}
 .jpv{font-family:monospace;font-size:11px;background:var(--bg2);border:0.5px solid var(--bd);border-radius:var(--r);padding:10px;max-height:120px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;color:var(--tx2);margin-top:8px;line-height:1.5}
-.idrop{border:1.5px dashed var(--bd2);border-radius:var(--rl);padding:20px;text-align:center;cursor:pointer;font-size:13px;color:var(--tx2);display:block}
+.idrop{border:1.5px dashed var(--bd2);border-radius:var(--rl2);padding:20px;text-align:center;cursor:pointer;font-size:13px;color:var(--tx2);display:block}
 .idrop:hover,.idrop.dov{border-color:var(--tx);color:var(--tx);background:var(--bg2)}
 .idrop input{display:none}
 .ires{margin-top:8px;font-size:12px;padding:7px 10px;border-radius:var(--r)}
-.ires.ok{background:var(--gl);color:#27500A}.ires.err{background:#FCEBEB;color:#791F1F}
+.ires.ok{background:var(--gl);color:#27500A}.ires.err{background:var(--rl);color:#791F1F}
 .gst ol{padding-left:18px;font-size:12px;color:var(--tx2);line-height:2.4}
 .mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:80;align-items:flex-start;justify-content:center;padding-top:40px}
 .mbg.on{display:flex}
-.modal{background:var(--bg);border-radius:var(--rl);border:0.5px solid var(--bd);width:520px;max-width:97vw;max-height:88vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.12)}
+.modal{background:var(--bg);border-radius:var(--rl2);border:0.5px solid var(--bd);width:520px;max-width:97vw;max-height:88vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.12)}
 .mhd{padding:14px 16px 10px;border-bottom:0.5px solid var(--bd);display:flex;align-items:flex-start;gap:10px;position:sticky;top:0;background:var(--bg);z-index:1}
 .aic{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0;color:#fff}
 .mttl{font-size:14px;font-weight:500}.msub{font-size:11px;color:var(--tx2);margin-top:2px;font-family:monospace}
@@ -64,18 +72,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .istrip{display:flex;gap:14px;flex-wrap:wrap;background:var(--bg2);border-radius:var(--r);padding:8px 12px;margin-bottom:12px}
 .isl{font-size:10px;color:var(--tx2)}.isv{font-size:12px;font-weight:500;font-family:monospace;margin-top:1px}
 .vcards{display:flex;flex-direction:column;gap:8px;margin-bottom:8px}
-.vc{border:0.5px solid var(--bd);border-radius:var(--rl);overflow:hidden;background:var(--bg)}
+.vc{border:0.5px solid var(--bd);border-radius:var(--rl2);overflow:hidden;background:var(--bg)}
 .vch{display:grid;grid-template-columns:1fr 64px auto 28px;gap:6px;align-items:start;padding:8px 10px;background:var(--bg2)}
 .vch select,.vch input[type=number]{font-size:12px;padding:5px 7px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg);color:var(--tx);font-family:inherit;width:100%}
 .vch input[type=number]{text-align:center}
 .vcb{padding:8px 10px;border-top:0.5px solid var(--bd)}
 .ffields{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .ffields .fr{margin-bottom:0}
-.pnote{font-size:11px;color:var(--tx2);display:flex;align-items:center;gap:6px;padding:2px 0}
+.pnote{font-size:11px;color:var(--tx2);display:flex;align-items:center;gap:6px;padding:2px 0;flex-wrap:wrap}
 .tbdg{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:500;white-space:nowrap}
 .tbdg.fl{background:var(--gl);color:var(--green)}.tbdg.pl{background:var(--bl);color:var(--blue)}
 .rmbtn{width:24px;height:24px;border:0.5px solid var(--bd2);border-radius:var(--r);background:transparent;color:var(--tx2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;padding:0;font-family:inherit;flex-shrink:0}
-.rmbtn:hover{background:#FCEBEB;border-color:#F09595;color:#A32D2D}
+.rmbtn:hover{background:var(--rl);border-color:#F09595;color:var(--red)}
 .avbtn{font-size:12px;padding:7px 12px;border:0.5px dashed var(--bd2);border-radius:var(--r);background:transparent;color:var(--tx2);cursor:pointer;width:100%;text-align:left;font-family:inherit;display:flex;align-items:center;gap:6px}
 .avbtn:hover{border-color:var(--tx);color:var(--tx);background:var(--bg2)}
 .vsum{margin-top:8px;padding:9px 11px;background:var(--gl);border-radius:var(--r);font-size:12px;color:#27500A;line-height:1.7;display:none}
@@ -87,6 +95,42 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .mono{font-family:monospace;font-size:11px}
 .ap{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:500;display:inline-block}
 #tt{position:fixed;z-index:200;background:var(--bg);border:0.5px solid var(--bd2);border-radius:var(--r);padding:8px 11px;font-size:11px;pointer-events:none;display:none;max-width:280px;line-height:1.7;box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+.pmbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:120;align-items:flex-start;justify-content:center;padding-top:30px}
+.pmbg.on{display:flex}
+.pmodal{background:var(--bg);border-radius:var(--rl2);border:0.5px solid var(--bd);width:700px;max-width:97vw;max-height:92vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.18)}
+.pmhd{padding:12px 16px;border-bottom:0.5px solid var(--bd);display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;top:0;background:var(--bg);z-index:1}
+.pmicon{width:28px;height:28px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:600;color:#fff;font-size:11px;flex-shrink:0}
+.pmttl{font-size:13px;font-weight:500}.pmsub{font-size:11px;color:var(--tx2);font-family:monospace}
+.pmbody{padding:14px 16px}
+.pmft{padding:10px 16px 14px;border-top:0.5px solid var(--bd);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:var(--bg)}
+.plate-wrap{background:var(--bg2);border-radius:var(--r);padding:12px;margin-bottom:12px;overflow-x:auto}
+.plate-grid{display:inline-grid;gap:4px}
+.pch{font-size:10px;font-weight:500;color:var(--tx2);text-align:center;padding:2px}
+.prh{font-size:10px;font-weight:500;color:var(--tx2);display:flex;align-items:center;justify-content:center;padding:2px 4px}
+.well{border-radius:50%;cursor:pointer;border:1.5px solid var(--bd2);background:var(--bg);display:flex;align-items:center;justify-content:center;transition:all 0.1s;position:relative;flex-shrink:0}
+.well:hover{border-color:#888;transform:scale(1.08)}
+.well.occ{background:#E1F5EE;border-color:#0F6E56}
+.well.wsel{border-color:var(--blue);box-shadow:0 0 0 2.5px var(--bl)}
+.well.cont{background:var(--rl);border-color:var(--red)}
+.wdot{width:6px;height:6px;border-radius:50%;background:#0F6E56;position:absolute}
+.wcont{width:6px;height:6px;border-radius:50%;background:var(--red);position:absolute}
+.pleg{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;font-size:11px;color:var(--tx2);align-items:center}
+.pldot{width:10px;height:10px;border-radius:50%;display:inline-block;flex-shrink:0;border:1.5px solid}
+.psum{display:flex;gap:16px;flex-wrap:wrap;padding:8px 12px;background:var(--bg2);border-radius:var(--r);margin-bottom:12px;font-size:12px}
+.psml{font-size:10px;color:var(--tx2)}.psmv{font-weight:500;margin-top:1px}
+.pbulk{display:none;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:10px;padding:8px 10px;background:var(--bl);border-radius:var(--r);border:0.5px solid #C8DCEF;font-size:12px}
+.pbulk.on{display:flex}
+.we{background:var(--bg2);border-radius:var(--r);padding:12px;border:0.5px solid var(--bd)}
+.wehd{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.weid{font-size:16px;font-weight:600;font-family:monospace;color:var(--blue)}
+.west{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:500}
+.west.occ{background:var(--gl);color:var(--green)}.west.emp{background:var(--bg2);color:var(--tx2);border:0.5px solid var(--bd2)}.west.con{background:var(--rl);color:var(--red)}
+.wgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.wfr{display:flex;flex-direction:column;gap:3px}
+.wfr label{font-size:11px;color:var(--tx2)}
+.wfr input,.wfr textarea{font-size:12px;padding:6px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg);color:var(--tx);font-family:inherit;width:100%}
+.wfr textarea{min-height:44px;resize:vertical}
+.weact{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:0.5px solid var(--bd)}
 </style>
 </head>
 <body>
@@ -125,7 +169,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
   <div style="overflow-x:auto">
     <table class="lt"><thead><tr>
-      <th>Passage ID</th><th>Line</th><th>P#</th><th>Action</th><th>Vessels</th><th>Date</th><th>Days</th><th>Split</th><th>Flask seeding</th>
+      <th>Passage ID</th><th>Line</th><th>P#</th><th>Action</th><th>Vessels</th><th>Date</th><th>Days</th><th>Split</th><th>Seeding</th>
     </tr></thead><tbody id="lb"></tbody></table>
   </div>
 </div>
@@ -161,9 +205,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="iotitle">GitHub workflow</div>
     <div class="gst"><ol>
       <li>After each session click <strong>Download JSON</strong></li>
-      <li>In VS Code drag the file into your <code>Tissue-Culture-Tracker</code> folder, replacing the old one</li>
+      <li>In VS Code drag the file into your <code>Tissue-Culture-Tracker</code> folder</li>
       <li>In the terminal: <code>git add tc-records.json &amp;&amp; git commit -m "update records" &amp;&amp; git push</code></li>
-      <li>Next session: run <code>python3 -m http.server 8080</code>, open <code>http://localhost:8080</code>, then import your JSON</li>
+      <li>Next session: <code>python3 -m http.server 8080</code> then import your JSON</li>
     </ol></div>
   </div>
 </div>
@@ -179,25 +223,163 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
   </div>
 </div>
+
+<div id="pmbg" class="pmbg" onclick="if(event.target===this)closePM()">
+  <div class="pmodal">
+    <div class="pmhd">
+      <div class="pmicon">&#9634;</div>
+      <div style="flex:1"><div class="pmttl" id="pm-title">Plate viewer</div><div class="pmsub" id="pm-sub"></div></div>
+      <select id="pm-fmt" onchange="setPF(this.value)" style="font-size:12px;padding:4px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg);color:var(--tx);font-family:inherit">
+        <option value="6">6-well</option><option value="12">12-well</option><option value="24">24-well</option><option value="48">48-well</option><option value="96">96-well</option>
+      </select>
+      <button class="btn btn-sm" onclick="pClearAll()">Clear all</button>
+    </div>
+    <div class="pmbody">
+      <div class="psum" id="pm-sum"></div>
+      <div class="pbulk" id="pm-bulk">
+        <span id="pm-bulk-lbl"></span>
+        <button class="btn btn-sm btn-blue" onclick="pBulkApply()">Apply to selected</button>
+        <button class="btn btn-sm" onclick="pClearSel()">Deselect all</button>
+      </div>
+      <div class="plate-wrap"><div class="plate-grid" id="pm-grid"></div></div>
+      <div class="pleg">
+        <span style="display:flex;align-items:center;gap:4px"><span class="pldot" style="background:#fff;border-color:#C8C6BF"></span>Empty</span>
+        <span style="display:flex;align-items:center;gap:4px"><span class="pldot" style="background:#E1F5EE;border-color:#0F6E56"></span>Occupied</span>
+        <span style="display:flex;align-items:center;gap:4px"><span class="pldot" style="background:#FCEBEB;border-color:#A32D2D"></span>Contaminated</span>
+        <span style="color:var(--tx2);font-size:10px;margin-left:4px">Shift+click to multi-select</span>
+      </div>
+      <div class="we" id="pm-we" style="display:none">
+        <div class="wehd">
+          <div class="weid" id="pm-weid">A1</div>
+          <div class="west emp" id="pm-west">Empty</div>
+          <div style="margin-left:auto;display:flex;gap:5px">
+            <button class="btn btn-sm" onclick="pNavWell(-1)">&#8592;</button>
+            <button class="btn btn-sm" onclick="pNavWell(1)">&#8594;</button>
+          </div>
+        </div>
+        <div class="wgrid">
+          <div class="wfr">
+            <label>Seeding density</label>
+            <div style="display:flex;gap:4px;align-items:center">
+              <input id="pm-seed" placeholder="e.g. 5000 cells/cm2" oninput="pDirty();pSciPreview('pm-seed','pm-seed-sci')">
+              <button class="sci-btn" onclick="pFmtSci('pm-seed','pm-seed-sci')">sci</button>
+            </div>
+            <div class="sci-preview" id="pm-seed-sci"></div>
+          </div>
+          <div class="wfr">
+            <label>Cell count seeded</label>
+            <div style="display:flex;gap:4px;align-items:center">
+              <input id="pm-count" placeholder="e.g. 50000" oninput="pDirty();pSciPreview('pm-count','pm-count-sci')">
+              <button class="sci-btn" onclick="pFmtSci('pm-count','pm-count-sci')">sci</button>
+            </div>
+            <div class="sci-preview" id="pm-count-sci"></div>
+          </div>
+          <div class="wfr"><label>Medium / condition</label><input id="pm-cond" placeholder="e.g. DMEM 10% FBS" oninput="pDirty()"></div>
+          <div class="wfr"><label>Treatment</label><input id="pm-treat" placeholder="e.g. 10uM compound A" oninput="pDirty()"></div>
+        </div>
+        <div class="wfr"><label>Notes</label><textarea id="pm-note" placeholder="Observations, timepoints, any issues..." oninput="pDirty()"></textarea></div>
+        <div class="weact">
+          <button class="btn btn-sm btn-p" onclick="pApplyWell()">Apply</button>
+          <button class="btn btn-sm btn-red" id="pm-cont-btn" onclick="pToggleCont()">Flag contaminated</button>
+          <button class="btn btn-sm" onclick="pClearWell()">Clear well</button>
+          <span id="pm-dirty" style="font-size:11px;color:var(--tx2);display:none;align-self:center">Unsaved changes</span>
+        </div>
+      </div>
+    </div>
+    <div class="pmft">
+      <button class="btn" onclick="closePM()">Cancel</button>
+      <button class="btn btn-p" onclick="savePM()">Save plate data</button>
+    </div>
+  </div>
+</div>
+
 <div id="tt"></div>
 </div>
 
 <script>
+// ── constants ──
 const AC={thaw:'#185FA5',inherit:'#534AB7',passage:'#0F6E56',freeze:'#854F0B',experiment:'#993C1D'};
 const AF={thaw:'#E6F1FB',inherit:'#EEEDFE',passage:'#E1F5EE',freeze:'#FAEEDA',experiment:'#FAECE7'};
 const AL={thaw:'Thaw',inherit:'Inherit',passage:'Passage',freeze:'Freeze',experiment:'Experiment'};
 const AI={thaw:'T',inherit:'I',passage:'P',freeze:'F',experiment:'E'};
 const LC=['#534AB7','#0F6E56','#D85A30','#1D9E75','#854F0B','#185FA5','#993C1D'];
 const LF=['#EEEDFE','#E1F5EE','#FAECE7','#E1F5EE','#FAEEDA','#E6F1FB','#FAECE7'];
-const PLATES=['6-well plate','12-well plate','24-well plate','48-well plate','96-well plate','384-well plate'];
+const PLATES=['6-well plate','12-well plate','24-well plate','48-well plate','96-well plate','384-well plate']; // kept in well-count order for isPlate() detection
+const PLATE_ROWS={6:2,12:3,24:4,48:6,96:8,384:16};
+const PLATE_COLS={6:3,12:4,24:6,48:8,96:12,384:24};
+const PLATE_WS={6:60,12:48,24:38,48:30,96:24,384:14};
+const PLATE_RL='ABCDEFGHIJKLMNOP';
 const FA={T25:25,T75:75,T150:150,T175:175,T225:225,T300:300,T500:500,HYPERFlask:1720,'Roller bottle':850,'Dish 35mm':8,'Dish 60mm':21,'Dish 100mm':55,'Dish 150mm':145};
 
+// ── state ──
 let passages=[];
-let MS={mode:null,parentId:null,editId:null,action:null};
-let CT='adherent';
+let MS={mode:null,parentId:null,editId:null,action:null,_tempId:null,_stub:null};
 let VL=[];
 let LM={};
+let PM={recId:null,vesselKey:null,fmt:6,wells:{},selWell:null,selWells:new Set(),allIds:[]};
 
+// ── scientific notation ──
+function toSci(val) {
+  if(!val||val.toString().trim()==='') return '';
+  let s=val.toString().trim().replace(/,/g,'');
+  if(s.includes('\u00d710')) return s; // already formatted
+  let num;
+  if(/^[\d.]+k$/i.test(s))            num=parseFloat(s)*1e3;
+  else if(/^[\d.]+m$/i.test(s))       num=parseFloat(s)*1e6;
+  else if(/^[\d.]+e\d+$/i.test(s))    num=parseFloat(s);
+  else                                  num=parseFloat(s);
+  if(isNaN(num)||num===0) return '';
+  let exp=Math.floor(Math.log10(Math.abs(num)));
+  let coeff=num/Math.pow(10,exp);
+  // fix float precision: if coeff rounds to 10, bump exponent
+  if(Math.round(coeff*1e9)/1e9>=10){exp+=1;coeff=num/Math.pow(10,exp);}
+  const cs=parseFloat(coeff.toPrecision(3)).toString();
+  const sup={'-':'\u207b','0':'\u2070','1':'\u00b9','2':'\u00b2','3':'\u00b3','4':'\u2074','5':'\u2075','6':'\u2076','7':'\u2077','8':'\u2078','9':'\u2079'};
+  const es=exp.toString().split('').map(c=>sup[c]||c).join('');
+  return (cs==='1'?'':cs+'\u00d7')+'10'+es;
+}
+
+// show live preview below field, convert on "sci" button click
+function sciPreview(inputId, previewId) {
+  const el=document.getElementById(inputId);
+  const pv=document.getElementById(previewId);
+  if(!el||!pv) return;
+  const s=toSci(el.value);
+  pv.textContent=s?'= '+s:'';
+}
+
+function sciConvert(inputId, previewId) {
+  const el=document.getElementById(inputId);
+  const pv=document.getElementById(previewId);
+  if(!el) return;
+  const s=toSci(el.value);
+  if(s){el.value=s;if(pv)pv.textContent='';}
+}
+
+// plate viewer versions (same thing, different name for clarity in inline html)
+function pSciPreview(a,b){sciPreview(a,b);}
+function pFmtSci(a,b){sciConvert(a,b);}
+
+// seeding input HTML builder — used in thaw/inherit and passage vessel rows
+function seedingInput(id, previewId, placeholder, extraOnInput) {
+  const extra=extraOnInput?';'+extraOnInput:'';
+  return '<div style="display:flex;gap:4px;align-items:center">'
+    +'<input id="'+id+'" type="text" value="" placeholder="'+placeholder+'" oninput="sciPreview(\''+id+'\',\''+previewId+'\')'+extra+'" style="font-size:13px;padding:7px 9px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%">'
+    +'<button class="sci-btn" onclick="sciConvert(\''+id+'\',\''+previewId+'\')" type="button">sci</button>'
+    +'</div>'
+    +'<div class="sci-preview" id="'+previewId+'"></div>';
+}
+
+function seedingInputVal(id, previewId, placeholder, val, extraOnInput) {
+  const extra=extraOnInput?';'+extraOnInput:'';
+  return '<div style="display:flex;gap:4px;align-items:center">'
+    +'<input id="'+id+'" type="text" value="'+val+'" placeholder="'+placeholder+'" oninput="sciPreview(\''+id+'\',\''+previewId+'\')'+extra+'" style="font-size:13px;padding:7px 9px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%">'
+    +'<button class="sci-btn" onclick="sciConvert(\''+id+'\',\''+previewId+'\')" type="button">sci</button>'
+    +'</div>'
+    +'<div class="sci-preview" id="'+previewId+'">'+( val?'= '+toSci(val):'')+'</div>';
+}
+
+// ── helpers ──
 function lc(l,f){if(!LM[l]){const i=Object.keys(LM).length;LM[l]={c:LC[i%LC.length],f:LF[i%LF.length]};}return f?LM[l].f:LM[l].c;}
 function pL(n){if(n.action==='thaw')return'Thaw P'+n.passageNum;if(n.action==='inherit')return'Inherit P'+n.passageNum;if(n.action==='freeze')return'P'+n.passageNum+' Frz';if(n.action==='experiment')return'P'+n.passageNum+' Exp';return'P'+n.passageNum;}
 function vLbl(n){if(n.vessels&&n.vessels.length)return n.vessels.map(v=>'('+v.qty+') '+v.type).join(', ');return n.wells||'';}
@@ -210,12 +392,14 @@ function tod(){return new Date().toISOString().slice(0,10);}
 function fv(id){const e=document.getElementById(id);return e?e.value.trim():'';}
 function fi(id){const e=document.getElementById(id);return e?parseInt(e.value)||0:0;}
 function isPlate(t){return PLATES.includes(t);}
+function plateNumFromType(t){const m=t&&t.match(/^(\d+)/);return m?parseInt(m[1]):6;}
 
 function updLF(){
   const lines=['all',...new Set(passages.map(p=>p.line))];
   ['lf','lgf'].forEach(id=>{const s=document.getElementById(id);if(!s)return;const c=s.value;s.innerHTML=lines.map(l=>'<option value="'+l+'">'+(l==='all'?'All lines':l)+'</option>').join('');s.value=lines.includes(c)?c:'all';});
 }
 
+// ── import / export ──
 function bld(){return{schemaVersion:'1.1',exportedAt:new Date().toISOString(),recordCount:passages.length,passages};}
 function doExport(){const json=JSON.stringify(bld(),null,2);const fn='tc-records-'+tod()+'.json';const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([json],{type:'application/json'}));a.download=fn;a.click();toast('Downloaded '+fn);}
 function copyJ(){const json=JSON.stringify(bld(),null,2);navigator.clipboard.writeText(json).then(()=>toast('Copied')).catch(()=>{const t=document.createElement('textarea');t.value=json;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();toast('Copied');});}
@@ -223,15 +407,69 @@ function handleFile(e){const f=e.target.files[0];if(f)loadF(f);}
 function loadF(file){const r=new FileReader();r.onload=ev=>{try{impD(JSON.parse(ev.target.result),file.name);}catch(e){showIR(false,'Invalid JSON: '+e.message);}};r.readAsText(file);}
 function impD(data,fn){const imp=Array.isArray(data)?data:(data.passages&&Array.isArray(data.passages)?data.passages:null);if(!imp){showIR(false,'Could not find passages array.');return;}if(!imp.length){showIR(false,'File is empty.');return;}const miss=['id','action','line','passageNum'].filter(k=>!(k in imp[0]));if(miss.length){showIR(false,'Missing fields: '+miss.join(', '));return;}passages=imp;LM={};updLF();renderL();refreshIO();showIR(true,'Loaded '+imp.length+' record'+(imp.length!==1?'s':'')+' from '+fn+(data.exportedAt?' (exported '+data.exportedAt.slice(0,10)+')':'')+'.');toast('Imported '+imp.length+' records');}
 function showIR(ok,msg){const e=document.getElementById('ir');if(!e)return;e.className='ires '+(ok?'ok':'err');e.textContent=(ok?'✓ ':'')+msg;e.style.display='block';}
-function refreshIO(){const json=JSON.stringify(bld(),null,2);const fn=document.getElementById('efn');if(fn)fn.textContent='tc-records-'+tod()+'.json';const pv=document.getElementById('jpv');if(pv)pv.textContent=json.slice(0,600)+(json.length>600?'\n\n… ('+passages.length+' records total)':'');}
+function refreshIO(){const json=JSON.stringify(bld(),null,2);const fn=document.getElementById('efn');if(fn)fn.textContent='tc-records-'+tod()+'.json';const pv=document.getElementById('jpv');if(pv)pv.textContent=json.slice(0,600)+(json.length>600?'\n\n... ('+passages.length+' records total)':'');}
 
+// ── tabs ──
 function showTab(id,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));document.getElementById('tab-'+id).classList.add('on');el.classList.add('on');if(id==='log')renderLog();else if(id==='overview')renderOV();else if(id==='io')refreshIO();else renderL();}
 
+
+// ── vessel icons for lineage nodes ──
+function flaskSVG(color) {
+  // Erlenmeyer flask
+  return '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    +'<path d="M5 1h4M5 1v4L2 11.5a1 1 0 00.9 1.5h8.2a1 1 0 00.9-1.5L9 5V1" stroke="'+color+'" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>'
+    +'<path d="M3.5 9h7" stroke="'+color+'" stroke-width="1" stroke-linecap="round"/>'
+    +'</svg>';
+}
+
+function dishSVG(color) {
+  // petri dish / culture dish — top-down oval view
+  return '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    +'<ellipse cx="7" cy="7" rx="5.5" ry="4" stroke="'+color+'" stroke-width="1.1"/>'
+    +'<ellipse cx="7" cy="7" rx="3.5" ry="2.5" stroke="'+color+'" stroke-width="0.8" stroke-dasharray="2 1"/>'
+    +'</svg>';
+}
+
+function plateSVG(color) {
+  // 2x3 grid of circles representing a plate
+  return '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    +'<rect x="1" y="1" width="12" height="12" rx="2" stroke="'+color+'" stroke-width="1.1"/>'
+    +'<circle cx="4" cy="4.5" r="1" fill="'+color+'"/><circle cx="7" cy="4.5" r="1" fill="'+color+'"/><circle cx="10" cy="4.5" r="1" fill="'+color+'"/>'
+    +'<circle cx="4" cy="9.5" r="1" fill="'+color+'"/><circle cx="7" cy="9.5" r="1" fill="'+color+'"/><circle cx="10" cy="9.5" r="1" fill="'+color+'"/>'
+    +'</svg>';
+}
+
+const DISHES=['Dish 35mm','Dish 60mm','Dish 100mm','Dish 150mm'];
+
+function nodeVesselIcons(n, color) {
+  let hasFlask=false, hasPlate=false, hasDish=false;
+  if(n.vessels&&n.vessels.length){
+    n.vessels.forEach(function(v){
+      if(isPlate(v.type)) hasPlate=true;
+      else if(DISHES.includes(v.type)) hasDish=true;
+      else hasFlask=true;
+    });
+  } else if(n.wells){
+    const w=n.wells;
+    if(PLATES.some(function(p){return w.includes(p);})) hasPlate=true;
+    else if(DISHES.some(function(d){return w.includes(d);})) hasDish=true;
+    else if(w) hasFlask=true;
+  }
+  if(n.action==='freeze') return flaskSVG(color);
+  if(n.action==='experiment') return plateSVG(color);
+  let icons='';
+  if(hasPlate) icons+=plateSVG(color);
+  if(hasDish) icons+=dishSVG(color);
+  if(hasFlask) icons+=flaskSVG(color);
+  return icons;
+}
+
+// ── lineage ──
 function bTree(nodes){const map={};nodes.forEach(n=>map[n.id]={...n,children:[]});const roots=[];nodes.forEach(n=>{if(n.parent&&map[n.parent])map[n.parent].children.push(map[n.id]);else if(!n.parent)roots.push(map[n.id]);});return roots;}
 const NW=126,NH=66,DPX=20,VG=82,HG=16;
 function lay(roots){const out=[];let gy=28;roots.forEach(root=>{const br=[];function wk(n,x,y){n._x=x+(n.days||0)*DPX+(n.days>0?HG:0);n._y=y;br.push(n);n.children.forEach((c,i)=>wk(c,n._x+NW+HG,y+i*VG));}wk(root,20,gy);out.push(...br);gy=Math.max(...br.map(b=>b._y))+VG+20;});return out;}
 function mks(tag,a){const e=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(a).forEach(([k,v])=>e.setAttribute(k,v));return e;}
-function trn(s,n){return s&&s.length>n?s.slice(0,n-1)+'…':s;}
+function trn(s,n){return s&&s.length>n?s.slice(0,n-1)+'...':s;}
 
 function renderL(){
   const f=document.getElementById('lf').value;
@@ -250,7 +488,12 @@ function renderL(){
     g.appendChild(mks('rect',{x:0,y:0,width:NW,height:NH,rx:6,fill:AF[n.action],stroke:AC[n.action],'stroke-width':0.75}));
     g.appendChild(mks('rect',{x:(NW-52)/2,y:-7,width:52,height:14,rx:7,fill:AC[n.action]}));
     const bt=mks('text',{x:NW/2,y:0,'text-anchor':'middle','dominant-baseline':'central','font-size':8,'font-weight':600,fill:'#fff','font-family':'system-ui'});bt.textContent=AL[n.action].toUpperCase();g.appendChild(bt);
-    [{x:6,y:17,sz:11,fw:500,fill:AC[n.action],txt:pL(n)},{x:6,y:29,sz:9,fill:'#777',txt:trn(n.id,18)},{x:6,y:41,sz:9,fill:'#888',txt:trn(vl,18)},{x:6,y:55,sz:9,fill:'#aaa',txt:n.date}].forEach(o=>{const t=mks('text',{x:o.x,y:o.y,'font-size':o.sz,fill:o.fill,'font-family':'system-ui'});if(o.fw)t.setAttribute('font-weight',o.fw);t.textContent=o.txt;g.appendChild(t);});
+    [{x:6,y:17,sz:11,fw:500,fill:AC[n.action],txt:pL(n)},{x:6,y:29,sz:9,fill:'#777',txt:trn(n.id,18)},{x:6,y:55,sz:9,fill:'#aaa',txt:n.date}].forEach(o=>{const t=mks('text',{x:o.x,y:o.y,'font-size':o.sz,fill:o.fill,'font-family':'system-ui'});if(o.fw)t.setAttribute('font-weight',o.fw);t.textContent=o.txt;g.appendChild(t);});
+    // vessel label (shortened to leave room)
+    const vlt=mks('text',{x:6,y:41,'font-size':9,fill:'#888','font-family':'system-ui'});vlt.textContent=trn(vl,14);g.appendChild(vlt);
+    // vessel icon top-right
+    const icons=nodeVesselIcons(n,AC[n.action]);
+    if(icons){const fo=mks('foreignObject',{x:NW-32,y:3,width:28,height:14});fo.innerHTML='<div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;gap:1px;justify-content:flex-end">'+icons+'</div>';g.appendChild(fo);}
     const ab=mks('rect',{x:NW-17,y:NH-15,width:13,height:12,rx:3,fill:AC[n.action],opacity:0.9,cursor:'pointer'});g.appendChild(ab);
     const at=mks('text',{x:NW-10,y:NH-8,'text-anchor':'middle','dominant-baseline':'central','font-size':10,'font-weight':600,fill:'#fff',cursor:'pointer','font-family':'system-ui'});at.textContent='+';g.appendChild(at);
     g.addEventListener('click',()=>openF(n.id,'edit'));
@@ -266,11 +509,12 @@ function renderL(){
 function showTT(e,n){
   const vl=vLbl(n);
   const tt=document.getElementById('tt');
-  tt.innerHTML='<b style="font-size:12px;font-weight:500">'+pL(n)+' · '+n.line+'</b><br>'
+  tt.innerHTML='<b style="font-size:12px;font-weight:500">'+pL(n)+' - '+n.line+'</b><br>'
     +'<span style="font-family:monospace;font-size:10px;color:#6B6A65">'+n.id+'</span><br>'
-    +'<span style="color:#6B6A65">'+n.date+(n.days>0?' · '+n.days+'d':'')+'</span><br>'
+    +'<span style="color:#6B6A65">'+n.date+(n.days>0?' - '+n.days+'d':'')+'</span><br>'
     +(vl?'<span>'+vl+'</span><br>':'')
-    +(n.splitRatio?'<span style="color:#6B6A65">Split: '+n.splitRatio+(n.confluency?' · '+n.confluency+'%':'')+'</span><br>':'')
+    +(n.seedingDensity?'<span style="color:#6B6A65">Seeding: '+n.seedingDensity+'</span><br>':'')
+    +(n.splitRatio?'<span style="color:#6B6A65">Split: '+n.splitRatio+'</span><br>':'')
     +'<span style="color:#6B6A65">'+n.condition+'</span><br>'
     +(n.note?'<span>'+n.note+'</span><br>':'')
     +'<span style="color:#6B6A65">by '+n.user+'</span>';
@@ -280,9 +524,9 @@ function showTT(e,n){
 function showBM(pid){
   const par=passages.find(p=>p.id===pid),np=nP(pid);
   MS={mode:'menu',parentId:pid};
-  document.getElementById('mhd').innerHTML='<div class="aic" style="background:#444;font-size:18px">+</div><div><div class="mttl">Add record after '+pid+'</div><div class="msub">'+pL(par)+' · '+par.line+' · '+par.date+'</div></div>';
+  document.getElementById('mhd').innerHTML='<div class="aic" style="background:#444;font-size:18px">+</div><div><div class="mttl">Add record after '+pid+'</div><div class="msub">'+pL(par)+' - '+par.line+' - '+par.date+'</div></div>';
   document.getElementById('mbd').innerHTML='<div style="background:#fff;border:0.5px solid #E3E1DB;border-radius:10px;padding:8px;min-width:200px">'
-    +[{a:'passage',l:'Passage',m:'→ P'+np},{a:'freeze',l:'Freeze vials',m:'stays P'+par.passageNum},{a:'experiment',l:'Start experiment',m:'stays P'+par.passageNum}]
+    +[{a:'passage',l:'Passage',m:'P'+np},{a:'freeze',l:'Freeze vials',m:'stays P'+par.passageNum},{a:'experiment',l:'Start experiment',m:'stays P'+par.passageNum}]
     .map(x=>'<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:13px" onmouseenter="this.style.background=\'#F5F4F1\'" onmouseleave="this.style.background=\'\'" onclick="closeM();openF(\''+pid+'\',\''+x.a+'\')">'
       +'<span style="width:9px;height:9px;border-radius:50%;background:'+AC[x.a]+';flex-shrink:0;display:inline-block"></span>'
       +'<div><div>'+x.l+'</div><div style="font-size:10px;color:#6B6A65;margin-top:1px">'+x.m+'</div></div></div>').join('')
@@ -291,68 +535,422 @@ function showBM(pid){
   document.getElementById('mbg').classList.add('on');
 }
 
-// vessel list functions
-function addV(type,qty,seeding,seedingTotal){
-  VL.push({id:'v'+Date.now()+Math.random().toString(36).slice(2,5),type:type||'',qty:qty||1,seeding:seeding||'',seedingTotal:seedingTotal||'',custom:''});
-  renderVL();
+// ── vessel dropdown for thaw/inherit ──
+// Vessel groups ordered largest to smallest within each category
+const VESSEL_GROUPS = [
+  {label:'Multi-well plates', items:['6-well plate','12-well plate','24-well plate','48-well plate','96-well plate','384-well plate']},
+  {label:'Dishes',            items:['Dish 150mm','Dish 100mm','Dish 60mm','Dish 35mm']},
+  {label:'Standard flasks',  items:['T500','T300','T225','T175','T150','T75','T25']},
+  {label:'Large-scale',      items:['HYPERFlask','Roller bottle','Spinner flask']},
+];
+const VG_OPEN = {'Multi-well plates':true,'Dishes':false,'Standard flasks':true,'Large-scale':false};
+let currentVessel = '';
+
+function vesselDropdown(sel) {
+  currentVessel = sel || '';
+  const custom = sel === 'Custom...' ? '<input id="fw-custom" placeholder="Describe vessel..." style="font-size:13px;padding:7px 9px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%">' : '<span id="fw-custom-placeholder"></span>';
+  return '<div style="display:flex;flex-direction:column;gap:4px" id="vessel-picker-wrap">'
+    + '<div id="vessel-display" onclick="toggleVesselPicker()" style="font-size:13px;padding:7px 9px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:'+(sel&&sel!==''?'var(--tx)':'var(--tx2)')+';font-family:inherit;width:100%;cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none">'
+    + '<span id="vessel-display-text">'+(sel&&sel!==''?sel:'-- choose vessel --')+'</span>'
+    + '<span>▾</span></div>'
+    + '<div id="vessel-picker-dropdown" style="display:none;position:relative;z-index:10;box-shadow:0 4px 16px rgba(0,0,0,0.12);border-radius:var(--r);overflow:hidden;border:0.5px solid var(--bd2);max-height:260px;overflow-y:auto;background:var(--bg)">'
+    + '<div style="padding:6px 9px;font-size:12px;color:var(--tx2);border-bottom:0.5px solid var(--bd)">-- choose vessel --</div>'
+    + buildVesselGroups(sel)
+    + '</div>'
+    + custom
+    + '<input type="hidden" id="fw" value="'+esc(sel||'')+'">'
+    + '</div>';
 }
+
+function buildVesselGroups(sel) {
+  let h = '';
+  VESSEL_GROUPS.forEach(function(g) {
+    const open = VG_OPEN[g.label];
+    const gid = 'vg-' + g.label.replace(/\s+/g,'-');
+    h += '<div style="border-bottom:0.5px solid var(--bd)">';
+    h += '<div id="vgh-'+gid+'" onclick="toggleVG(this,\''+gid+'\')" style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;cursor:pointer;font-size:11px;font-weight:500;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;user-select:none;background:var(--bg2)">';
+    h += '<span>'+g.label+'</span><span>'+(open?'▾':'▸')+'</span></div>';
+    h += '<div id="'+gid+'" style="display:'+(open?'block':'none')+'">';
+    g.items.forEach(function(item) {
+      const isSel = sel === item;
+      h += '<div onclick="selectVessel(this)" data-val="'+item+'" style="padding:6px 14px;font-size:13px;cursor:pointer;background:'+(isSel?'var(--bl)':'')+';color:'+(isSel?'var(--blue)':'')+';font-weight:'+(isSel?'500':'')+'">';
+      h += item + '</div>';
+    });
+    h += '</div></div>';
+  });
+  // Custom option
+  h += '<div onclick="selectVessel(this)" data-val="Custom..." style="padding:6px 10px;font-size:13px;cursor:pointer;color:var(--tx2)">Custom...</div>';
+  return h;
+}
+
+function toggleVesselPicker() {
+  const dd = document.getElementById('vessel-picker-dropdown');
+  if(!dd) return;
+  dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+}
+
+function toggleVG(el, gid) {
+  const body = document.getElementById(gid);
+  if(!body) return;
+  const label = el.querySelector('span:first-child').textContent;
+  VG_OPEN[label] = !VG_OPEN[label];
+  body.style.display = VG_OPEN[label] ? 'block' : 'none';
+  const caret = el.querySelector('span:last-child');
+  if(caret) caret.textContent = VG_OPEN[label] ? '▾' : '▸';
+}
+
+function selectVessel(el) {
+  const val = el.dataset.val;
+  currentVessel = val;
+  const hw = document.getElementById('fw');
+  if(hw) hw.value = val;
+  const disp = document.getElementById('vessel-display-text');
+  if(disp){disp.textContent = val;disp.parentElement.style.color = 'var(--tx)';}
+  const dd = document.getElementById('vessel-picker-dropdown');
+  if(dd) dd.style.display = 'none';
+  // highlight selection
+  document.querySelectorAll('#vessel-picker-dropdown [data-val]').forEach(function(d){
+    d.style.background = d.dataset.val === val ? 'var(--bl)' : '';
+    d.style.color = d.dataset.val === val ? 'var(--blue)' : '';
+    d.style.fontWeight = d.dataset.val === val ? '500' : '';
+  });
+  // custom input
+  const wrap = document.getElementById('vessel-picker-wrap');
+  if(wrap) {
+    let customEl = document.getElementById('fw-custom');
+    const placeholder = document.getElementById('fw-custom-placeholder');
+    if(val === 'Custom...') {
+      if(!customEl) {
+        const inp = document.createElement('input');
+        inp.id='fw-custom';inp.placeholder='Describe vessel...';
+        inp.style.cssText='font-size:13px;padding:7px 9px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%';
+        if(placeholder) placeholder.replaceWith(inp); else wrap.appendChild(inp);
+      }
+    } else {
+      if(customEl){const ph=document.createElement('span');ph.id='fw-custom-placeholder';customEl.replaceWith(ph);}
+    }
+  }
+  onVesselChange();
+}
+
+function onVesselChange() {
+  const sel=document.getElementById('fw');
+  const val=sel?sel.value:'';
+  // custom input
+  const par=sel?sel.parentNode:null;
+  const existing=document.getElementById('fw-custom');
+  if(val==='Custom...'&&!existing&&par){
+    const inp=document.createElement('input');inp.id='fw-custom';inp.placeholder='Describe vessel...';
+    inp.style.cssText='font-size:13px;padding:7px 9px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%';
+    par.appendChild(inp);
+  } else if(val!=='Custom...'&&existing){existing.remove();}
+  // seeding / plate button
+  const seedRow=document.getElementById('thaw-seed-row');
+  const plateBtnRow=document.getElementById('plate-btn-row');
+  const isSusp=val==='Spinner flask';
+  if(isPlate(val)){
+    if(seedRow)seedRow.style.display='none';
+    if(plateBtnRow)plateBtnRow.innerHTML='<button class="plate-btn" onclick="openPMThawNew(\''+val+'\')">View / edit plate wells</button>';
+  } else if(val&&val!=='Custom...'&&val!==''){
+    if(seedRow){
+      seedRow.style.display='block';
+      const lbl=document.getElementById('thaw-seed-label');
+      if(lbl)lbl.textContent=(isSusp?'Cells / mL':'Cells / cm\u00b2')+' (optional)';
+      const hint=document.getElementById('thaw-seed-hint');
+      if(hint){hint.dataset.area=FA[val]||'';updateThawHint();}
+    }
+    if(plateBtnRow)plateBtnRow.innerHTML='';
+  } else {
+    if(seedRow)seedRow.style.display='none';
+    if(plateBtnRow)plateBtnRow.innerHTML='';
+  }
+}
+
+function updateThawHint(){
+  const hint=document.getElementById('thaw-seed-hint');
+  const densEl=document.getElementById('thaw-seed-density');
+  if(!hint||!densEl)return;
+  const area=parseFloat(hint.dataset.area);
+  const rawVal=densEl.value.replace(/[^\d.x\u00d7^e]/gi,'');
+  const num=parseFloat(rawVal.replace(/[^\d.]/g,''));
+  if(area&&num){
+    const total=num*area;
+    hint.textContent='approx '+toSci(total.toString())+' cells total';
+    hint.style.display='block';
+  } else {hint.style.display='none';}
+}
+
+function openPMThawNew(vesselType){
+  const tempId=MS._tempId||MS.editId;
+  if(!tempId){alert('Please fill in the cell line first.');return;}
+  let rec=passages.find(p=>p.id===tempId)||(MS._stub&&MS._stub.id===tempId?MS._stub:null);
+  if(!rec){rec={id:tempId,action:MS.action||'thaw',line:fv('fl')||'NEW',passageNum:0,plateData:{}};MS._stub=rec;}
+  openPMThaw(tempId,vesselType);
+}
+
+// ── vessel list (passage) ──
+function addV(type,qty,seeding,seedingTotal){VL.push({id:'v'+Date.now()+Math.random().toString(36).slice(2,5),type:type||'',qty:qty||1,seeding:seeding||'',seedingTotal:seedingTotal||'',custom:''});renderVL();}
 function remV(id){VL=VL.filter(v=>v.id!==id);renderVL();}
-function updVF(id,field,val){
-  const v=VL.find(v=>v.id===id);if(!v)return;
-  if(field==='qty')v.qty=Math.max(1,parseInt(val)||1);else v[field]=val;
-  if(field==='type')renderVL();else updVSum();
+function updVF(id,field,val){const v=VL.find(v=>v.id===id);if(!v)return;if(field==='qty')v.qty=Math.max(1,parseInt(val)||1);else v[field]=val;if(field==='type')renderVL();else updVSum();}
+
+
+function vesselRowPicker(vid, sel) {
+  let h = '<div id="vrp-'+vid+'" style="position:relative">';
+  h += '<div data-vid="'+vid+'" onclick="toggleVRP(this)" style="font-size:12px;padding:5px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg);color:'+(sel&&sel!==''?'var(--tx)':'var(--tx2)')+';cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;min-height:30px">';
+  h += '<span id="vrp-disp-'+vid+'">'+(sel&&sel!==''?sel:'-- choose vessel --')+'</span><span style="font-size:10px">▾</span></div>';
+  h += '<div id="vrp-dd-'+vid+'" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:50;background:var(--bg);border:0.5px solid var(--bd2);border-radius:var(--r);box-shadow:0 4px 16px rgba(0,0,0,0.12);max-height:220px;overflow-y:auto">';
+  h += '<div data-vid="'+vid+'" data-val="" onclick="selectVRP(this)" style="padding:5px 8px;font-size:12px;color:var(--tx2);cursor:pointer">-- choose vessel --</div>';
+  VESSEL_GROUPS.forEach(function(g){
+    const open = VG_OPEN[g.label];
+    const gid = 'vrpg-'+vid+'-'+g.label.replace(/\s+/g,'-');
+    h += '<div style="border-top:0.5px solid var(--bd)">';
+    h += '<div data-gid="'+gid+'" onclick="toggleVRPG(this)" style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px;cursor:pointer;font-size:10px;font-weight:500;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;background:var(--bg2);user-select:none">';
+    h += '<span>'+g.label+'</span><span>'+(open?'▾':'▸')+'</span></div>';
+    h += '<div id="'+gid+'" style="display:'+(open?'block':'none')+'">';
+    g.items.forEach(function(item){
+      const isSel = sel===item;
+      h += '<div data-vid="'+vid+'" data-val="'+item+'" onclick="selectVRP(this)" style="padding:5px 14px;font-size:12px;cursor:pointer;background:'+(isSel?'var(--bl)':'')+';color:'+(isSel?'var(--blue)':'var(--tx)')+'">'+item+'</div>';
+    });
+    h += '</div></div>';
+  });
+  h += '<div data-vid="'+vid+'" data-val="Custom..." onclick="selectVRP(this)" style="border-top:0.5px solid var(--bd);padding:5px 8px;font-size:12px;cursor:pointer;color:var(--tx2)">Custom...</div>';
+  h += '</div></div>';
+  return h;
 }
+
+function toggleVRP(el) {
+  const vid = el.dataset.vid;
+  const dd = document.getElementById('vrp-dd-'+vid);
+  if(!dd) return;
+  document.querySelectorAll('[id^="vrp-dd-"]').forEach(function(e){
+    if(e.id !== 'vrp-dd-'+vid) e.style.display = 'none';
+  });
+  dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+}
+
+function toggleVRPG(el) {
+  const gid = el.dataset.gid;
+  const body = document.getElementById(gid);
+  if(!body) return;
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  const caret = el.querySelector('span:last-child');
+  if(caret) caret.textContent = isOpen ? '▸' : '▾';
+}
+
+function selectVRP(el) {
+  const vid = el.dataset.vid;
+  const val = el.dataset.val || '';
+  const dd = document.getElementById('vrp-dd-'+vid);
+  if(dd) dd.style.display = 'none';
+  const disp = document.getElementById('vrp-disp-'+vid);
+  if(disp){disp.textContent = val||'-- choose vessel --';disp.parentElement.style.color = val?'var(--tx)':'var(--tx2)';}
+  updVF(vid,'type',val);
+}
+
+// close vessel pickers when clicking outside
+document.addEventListener('click', function(e){
+  if(!e.target.closest('[id^="vrp-"]') && !e.target.closest('#vessel-picker-wrap')){
+    document.querySelectorAll('[id^="vrp-dd-"]').forEach(function(el){el.style.display='none';});
+    const vpd = document.getElementById('vessel-picker-dropdown');
+    if(vpd) vpd.style.display = 'none';
+  }
+});
+
 function renderVL(){
   const el=document.getElementById('vcards');if(!el)return;
   el.innerHTML=VL.map(v=>{
-    const ip=isPlate(v.type),ht=v.type&&v.type!=='',ic=v.type==='Custom…';
+    const ip=isPlate(v.type),ht=v.type&&v.type!=='',ic=v.type==='Custom...';
     const susp=v.type==='Spinner flask',area=FA[v.type];
-    const calc=area&&v.seeding&&!isNaN(parseFloat(v.seeding))?'≈ '+(parseFloat(v.seeding)*area).toLocaleString()+' cells / flask total':'';
+    const calcHint=area&&v.seeding&&parseFloat(v.seeding)?'approx '+toSci((parseFloat(v.seeding)*area).toString())+' cells total':'';
+    const sciPrevD=v.seeding?'= '+toSci(v.seeding):'';
+    const sciPrevT=v.seedingTotal?'= '+toSci(v.seedingTotal):'';
     return '<div class="vc">'
       +'<div class="vch">'
-      +'<div style="display:flex;flex-direction:column;gap:4px">'
-      +'<select onchange="updVF(\''+v.id+'\',\'type\',this.value)">'
-      +'<option value="">— choose vessel —</option>'
-      +'<optgroup label="Standard flasks">'+['T25','T75','T150','T175','T225','T300','T500'].map(t=>'<option'+(v.type===t?' selected':'')+'>'+t+'</option>').join('')+'</optgroup>'
-      +'<optgroup label="Large-scale">'+['HYPERFlask','Roller bottle','Spinner flask'].map(t=>'<option'+(v.type===t?' selected':'')+'>'+t+'</option>').join('')+'</optgroup>'
-      +'<optgroup label="Dishes">'+['Dish 35mm','Dish 60mm','Dish 100mm','Dish 150mm'].map(t=>'<option'+(v.type===t?' selected':'')+'>'+t+'</option>').join('')+'</optgroup>'
-      +'<optgroup label="Multi-well plates">'+PLATES.map(t=>'<option'+(v.type===t?' selected':'')+'>'+t+'</option>').join('')+'</optgroup>'
-      +'<option value="Custom…"'+(v.type==='Custom…'?' selected':'')+'>Custom…</option>'
-      +'</select>'
-      +(ic?'<input placeholder="Describe vessel…" value="'+esc(v.custom)+'" oninput="updVF(\''+v.id+'\',\'custom\',this.value)" style="font-size:12px;padding:5px 8px;border:0.5px solid #C8C6BF;border-radius:6px;background:#fff;color:#1A1915;font-family:inherit">':'')
-      +'</div>'
-      +'<input type="number" min="1" max="99" value="'+v.qty+'" title="Quantity" oninput="updVF(\''+v.id+'\',\'qty\',this.value)">'
+      +vesselRowPicker(v.id, v.type)
+      +(ic?'<input placeholder="Describe vessel..." value="'+esc(v.custom)+'" oninput="updVF(\''+v.id+'\',\'custom\',this.value)" style="font-size:12px;padding:5px 8px;border:0.5px solid #C8C6BF;border-radius:6px;background:#fff;color:#1A1915;font-family:inherit">':'')
+      +'<input type="number" min="1" max="99" value="'+v.qty+'" title="Qty" oninput="updVF(\''+v.id+'\',\'qty\',this.value)">'
       +(ht?'<span class="tbdg '+(ip?'pl':'fl')+'">'+(ip?'plate':'flask')+'</span>':'<span style="width:42px"></span>')
-      +'<button class="rmbtn" onclick="remV(\''+v.id+'\')" title="Remove">&#xD7;</button>'
+      +'<button class="rmbtn" onclick="remV(\''+v.id+'\')" title="Remove">x</button>'
       +'</div>'
       +(ht?'<div class="vcb">'
         +(ip
-          ?'<div class="pnote"><span style="width:7px;height:7px;border-radius:50%;background:#185FA5;display:inline-block;flex-shrink:0"></span>Seeding set <b>per well</b> in the plate viewer after saving.</div>'
-          :'<div class="ffields">'
-            +'<div class="fr" style="margin-bottom:0">'
-            +'<label style="font-size:11px;color:#6B6A65">'+(susp?'Cells / mL':'Cells / cm²')+' <span class="ot">optional</span></label>'
-            +'<input type="text" value="'+esc(v.seeding)+'" placeholder="'+(susp?'e.g. 3×10⁵':'e.g. 5000')+'" oninput="updVF(\''+v.id+'\',\'seeding\',this.value)" style="font-size:12px;padding:5px 8px">'
-            +(calc?'<div class="hint" style="color:#3B6D11">'+calc+'</div>':'')
+          ?'<div class="pnote"><span style="width:7px;height:7px;border-radius:50%;background:#185FA5;display:inline-block;flex-shrink:0"></span>Seeding set per well in plate viewer.'
+            +(MS.editId?'&nbsp;<button class="plate-btn" onclick="openPM(\''+MS.editId+'\',\'v_'+v.id+'\',\''+v.type+'\')">View plate</button>':'')
             +'</div>'
-            +'<div class="fr" style="margin-bottom:0">'
-            +'<label style="font-size:11px;color:#6B6A65">Total cells seeded <span class="ot">optional</span></label>'
-            +'<input type="text" value="'+esc(v.seedingTotal)+'" placeholder="e.g. 1×10⁶" oninput="updVF(\''+v.id+'\',\'seedingTotal\',this.value)" style="font-size:12px;padding:5px 8px">'
+          :'<div class="ffields">'
+            +'<div class="fr" style="margin-bottom:0"><label style="font-size:11px;color:#6B6A65">'+(susp?'Cells / mL':'Cells / cm\u00b2')+' <span class="ot">optional</span></label>'
+            +'<div style="display:flex;gap:4px;align-items:center">'
+            +'<input type="text" value="'+esc(v.seeding)+'" placeholder="'+(susp?'e.g. 3\u00d710\u2075':'e.g. 5000')+'" oninput="updVF(\''+v.id+'\',\'seeding\',this.value);sciPreview(\'vs-d-'+v.id+'\',\'vs-dp-'+v.id+'\')" id="vs-d-'+v.id+'" style="font-size:12px;padding:5px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%">'
+            +'<button class="sci-btn" onclick="sciConvert(\'vs-d-'+v.id+'\',\'vs-dp-'+v.id+'\');updVF(\''+v.id+'\',\'seeding\',document.getElementById(\'vs-d-'+v.id+'\').value)" type="button">sci</button>'
+            +'</div>'
+            +'<div class="sci-preview" id="vs-dp-'+v.id+'">'+sciPrevD+'</div>'
+            +(calcHint?'<div class="hint" style="color:#3B6D11">'+calcHint+'</div>':'')
+            +'</div>'
+            +'<div class="fr" style="margin-bottom:0"><label style="font-size:11px;color:#6B6A65">Total cells seeded <span class="ot">optional</span></label>'
+            +'<div style="display:flex;gap:4px;align-items:center">'
+            +'<input type="text" value="'+esc(v.seedingTotal)+'" placeholder="e.g. 1\u00d710\u2076" oninput="updVF(\''+v.id+'\',\'seedingTotal\',this.value);sciPreview(\'vs-t-'+v.id+'\',\'vs-tp-'+v.id+'\')" id="vs-t-'+v.id+'" style="font-size:12px;padding:5px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%">'
+            +'<button class="sci-btn" onclick="sciConvert(\'vs-t-'+v.id+'\',\'vs-tp-'+v.id+'\');updVF(\''+v.id+'\',\'seedingTotal\',document.getElementById(\'vs-t-'+v.id+'\').value)" type="button">sci</button>'
+            +'</div>'
+            +'<div class="sci-preview" id="vs-tp-'+v.id+'">'+sciPrevT+'</div>'
             +'</div></div>')
         +'</div>':'')
       +'</div>';
   }).join('');
   updVSum();
 }
+
 function updVSum(){
   const el=document.getElementById('vsum');if(!el)return;
   const fil=VL.filter(v=>v.type&&v.type!=='');
   if(!fil.length){el.style.display='none';return;}
-  const nl=fil.map(v=>'('+v.qty+') '+(v.type==='Custom…'?(v.custom||'Custom'):v.type)).join(', ');
-  const lines=fil.map(v=>{const label=v.type==='Custom…'?(v.custom||'Custom'):v.type;const ip=isPlate(v.type);const ss=v.seeding?' → '+v.seeding+(v.type==='Spinner flask'?' cells/mL':' cells/cm²'):'';return'('+v.qty+') '+label+(ip?' → seeding per well':ss);});
+  const nl=fil.map(v=>'('+v.qty+') '+(v.type==='Custom...'?(v.custom||'Custom'):v.type)).join(', ');
+  const lines=fil.map(v=>{const label=v.type==='Custom...'?(v.custom||'Custom'):v.type;const ip=isPlate(v.type);const ss=v.seeding?' -> '+v.seeding:'';return'('+v.qty+') '+label+(ip?' -> seeding per well':ss);});
   el.innerHTML='<div style="font-size:10px;font-weight:500;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em">Lineage tree will show:</div><div class="nl">'+nl+'</div><div style="margin-top:6px;font-size:11px">'+lines.join('<br>')+'</div>';
   el.style.display='block';
 }
 
+// ── plate viewer ──
+function pWid(r,c){return PLATE_RL[r]+(c+1);}
+function buildPIds(){const rows=PLATE_ROWS[PM.fmt]||2,cols=PLATE_COLS[PM.fmt]||3;PM.allIds=[];for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)PM.allIds.push(pWid(r,c));}
+function getPW(id){if(!PM.wells[id])PM.wells[id]={seeding:'',count:'',cond:'',treat:'',note:'',occupied:false,contaminated:false};return PM.wells[id];}
+
+function openPM(recId,vesselKey,vesselType){
+  document.getElementById('mbg').classList.remove('on');
+  const rec=passages.find(p=>p.id===recId);
+  PM.recId=recId;PM.vesselKey=vesselKey;PM.selWell=null;PM.selWells=new Set();
+  const num=plateNumFromType(vesselType);
+  PM.fmt=[6,12,24,48,96,384].includes(num)?num:6;
+  document.getElementById('pm-fmt').value=PM.fmt;
+  PM.wells=(rec&&rec.plateData&&rec.plateData[vesselKey])||{};
+  buildPIds();
+  document.getElementById('pm-title').textContent='Plate viewer - '+vesselType;
+  document.getElementById('pm-sub').textContent=(rec?rec.id+' - '+pL(rec)+' - '+rec.line:'');
+  document.getElementById('pm-we').style.display='none';
+  document.getElementById('pm-bulk').classList.remove('on');
+  renderPGrid();renderPSum();
+  document.getElementById('pmbg').classList.add('on');
+}
+
+function openPMThaw(recId,wellsStr){
+  const rec=passages.find(p=>p.id===recId)||(MS._stub&&MS._stub.id===recId?MS._stub:null);
+  const num=plateNumFromType(wellsStr);
+  PM.recId=recId;PM.vesselKey='thaw_plate';PM.selWell=null;PM.selWells=new Set();
+  PM.fmt=[6,12,24,48,96,384].includes(num)?num:6;
+  document.getElementById('pm-fmt').value=PM.fmt;
+  PM.wells=(rec&&rec.plateData&&rec.plateData['thaw_plate'])||{};
+  buildPIds();
+  document.getElementById('pm-title').textContent='Plate viewer - '+wellsStr;
+  document.getElementById('pm-sub').textContent=(rec?rec.id+' - '+(rec.line||''):'New record');
+  document.getElementById('pm-we').style.display='none';
+  document.getElementById('pm-bulk').classList.remove('on');
+  renderPGrid();renderPSum();
+  document.getElementById('mbg').classList.remove('on');
+  document.getElementById('pmbg').classList.add('on');
+}
+
+function setPF(f){PM.fmt=parseInt(f);PM.selWell=null;PM.selWells=new Set();buildPIds();renderPGrid();renderPSum();document.getElementById('pm-we').style.display='none';document.getElementById('pm-bulk').classList.remove('on');}
+
+function renderPGrid(){
+  const rows=PLATE_ROWS[PM.fmt]||2,cols=PLATE_COLS[PM.fmt]||3,ws=PLATE_WS[PM.fmt]||60;
+  const g=document.getElementById('pm-grid');
+  g.style.gridTemplateColumns='20px '+Array(cols).fill(ws+'px').join(' ');
+  let h='<div></div>';
+  for(let c=0;c<cols;c++)h+='<div class="pch">'+(c+1)+'</div>';
+  for(let r=0;r<rows;r++){
+    h+='<div class="prh">'+PLATE_RL[r]+'</div>';
+    for(let c=0;c<cols;c++){
+      const id=pWid(r,c);const w=PM.wells[id]||{};
+      const sel=PM.selWells.has(id)||PM.selWell===id;
+      h+='<div class="well'+(w.occupied?' occ':'')+(w.contaminated?' cont':'')+(sel?' wsel':'')+'" style="width:'+ws+'px;height:'+ws+'px" onclick="pClickWell(event,\''+id+'\')" title="'+id+'">'
+        +(w.contaminated?'<span class="wcont"></span>':w.occupied?'<span class="wdot"></span>':'')+'</div>';
+    }
+  }
+  g.innerHTML=h;
+}
+
+function pClickWell(e,id){
+  if(e.shiftKey){if(PM.selWell){PM.selWells.add(PM.selWell);PM.selWell=null;}if(PM.selWells.has(id))PM.selWells.delete(id);else PM.selWells.add(id);if(PM.selWells.size===1){PM.selWell=[...PM.selWells][0];PM.selWells.clear();}}
+  else{PM.selWells.clear();PM.selWell=id;}
+  renderPGrid();
+  if(PM.selWells.size>1){
+    document.getElementById('pm-bulk').classList.add('on');
+    document.getElementById('pm-bulk-lbl').textContent=PM.selWells.size+' wells selected';
+    document.getElementById('pm-we').style.display='block';
+    document.getElementById('pm-weid').textContent='Multiple wells';
+    document.getElementById('pm-west').textContent='';document.getElementById('pm-west').className='west emp';
+    ['pm-seed','pm-count','pm-cond','pm-treat','pm-note'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    document.getElementById('pm-seed-sci').textContent='';
+    document.getElementById('pm-count-sci').textContent='';
+  } else {document.getElementById('pm-bulk').classList.remove('on');showPWE(PM.selWell||[...PM.selWells][0]);}
+}
+
+function showPWE(id){
+  if(!id)return;
+  const w=getPW(id);
+  document.getElementById('pm-we').style.display='block';
+  document.getElementById('pm-weid').textContent=id;
+  const st=document.getElementById('pm-west');
+  if(w.contaminated){st.textContent='Contaminated';st.className='west con';}
+  else if(w.occupied){st.textContent='Occupied';st.className='west occ';}
+  else{st.textContent='Empty';st.className='west emp';}
+  document.getElementById('pm-seed').value=w.seeding||'';
+  document.getElementById('pm-count').value=w.count||'';
+  document.getElementById('pm-cond').value=w.cond||'';
+  document.getElementById('pm-treat').value=w.treat||'';
+  document.getElementById('pm-note').value=w.note||'';
+  document.getElementById('pm-seed-sci').textContent=w.seeding?'= '+toSci(w.seeding):'';
+  document.getElementById('pm-count-sci').textContent=w.count?'= '+toSci(w.count):'';
+  document.getElementById('pm-cont-btn').textContent=w.contaminated?'Clear contamination':'Flag contaminated';
+  document.getElementById('pm-cont-btn').className='btn btn-sm '+(w.contaminated?'btn-ok':'btn-red');
+  document.getElementById('pm-dirty').style.display='none';
+}
+
+function pApplyWell(){
+  const ids=PM.selWells.size>1?[...PM.selWells]:(PM.selWell?[PM.selWell]:[]);
+  if(!ids.length)return;
+  const vals={seeding:fv('pm-seed'),count:fv('pm-count'),cond:fv('pm-cond'),treat:fv('pm-treat'),note:fv('pm-note')};
+  ids.forEach(id=>{const w=getPW(id);Object.assign(w,vals);w.occupied=!!(vals.seeding||vals.count||vals.cond||vals.treat||vals.note);});
+  document.getElementById('pm-dirty').style.display='none';
+  renderPGrid();renderPSum();if(PM.selWell)showPWE(PM.selWell);
+  toast('Applied to '+ids.length+' well'+(ids.length!==1?'s':''));
+}
+function pBulkApply(){pApplyWell();}
+function pClearWell(){const id=PM.selWell;if(!id)return;PM.wells[id]={seeding:'',count:'',cond:'',treat:'',note:'',occupied:false,contaminated:false};renderPGrid();renderPSum();showPWE(id);}
+function pClearAll(){if(!confirm('Clear all well data?'))return;PM.wells={};PM.selWell=null;PM.selWells=new Set();renderPGrid();renderPSum();document.getElementById('pm-we').style.display='none';document.getElementById('pm-bulk').classList.remove('on');}
+function pClearSel(){PM.selWells.clear();PM.selWell=null;renderPGrid();document.getElementById('pm-bulk').classList.remove('on');document.getElementById('pm-we').style.display='none';}
+function pToggleCont(){const id=PM.selWell;if(!id)return;const w=getPW(id);w.contaminated=!w.contaminated;if(w.contaminated)w.occupied=true;renderPGrid();renderPSum();showPWE(id);}
+function pNavWell(dir){if(!PM.selWell)return;const idx=PM.allIds.indexOf(PM.selWell);const next=PM.allIds[idx+dir];if(next){PM.selWell=next;renderPGrid();showPWE(next);}}
+function pDirty(){document.getElementById('pm-dirty').style.display='inline';}
+
+function renderPSum(){
+  const occ=PM.allIds.filter(id=>PM.wells[id]&&PM.wells[id].occupied);
+  const cont=PM.allIds.filter(id=>PM.wells[id]&&PM.wells[id].contaminated);
+  const conds=[...new Set(occ.map(id=>PM.wells[id].cond).filter(Boolean))];
+  document.getElementById('pm-sum').innerHTML=
+    '<div><div class="psml">Format</div><div class="psmv">'+PM.fmt+'-well</div></div>'
+    +'<div><div class="psml">Wells in use</div><div class="psmv" style="color:#0F6E56">'+occ.length+' / '+PM.allIds.length+'</div></div>'
+    +(cont.length?'<div><div class="psml">Contaminated</div><div class="psmv" style="color:#A32D2D">'+cont.length+'</div></div>':'')
+    +(conds.length?'<div><div class="psml">Conditions</div><div class="psmv">'+conds.join(', ')+'</div></div>':'');
+}
+
+function savePM(){
+  const weVisible=document.getElementById('pm-we')&&document.getElementById('pm-we').style.display!=='none';
+  const dirty=document.getElementById('pm-dirty')&&document.getElementById('pm-dirty').style.display!=='none';
+  if(weVisible&&dirty)pApplyWell();
+  let rec=passages.find(p=>p.id===PM.recId);
+  if(!rec&&MS&&MS._stub&&MS._stub.id===PM.recId)rec=MS._stub;
+  if(!rec){rec={id:PM.recId,action:'thaw',line:'',passageNum:0,plateData:{}};if(MS)MS._stub=rec;}
+  if(!rec.plateData)rec.plateData={};
+  const data={};PM.allIds.forEach(id=>{if(PM.wells[id]&&(PM.wells[id].occupied||PM.wells[id].contaminated))data[id]=PM.wells[id];});
+  rec.plateData[PM.vesselKey]=data;
+  const occ=Object.keys(data).length;
+  closePM();
+  toast('Plate saved - '+occ+' occupied well'+(occ!==1?'s':'')+'. Click Save record to keep.');
+}
+function closePM(){document.getElementById('pmbg').classList.remove('on');}
+
+// ── forms ──
 function openF(pid,action){
   document.getElementById('tt').style.display='none';
   const isE=action==='edit';
@@ -360,30 +958,72 @@ function openF(pid,action){
   if(isE&&!en)return;
   const par=isE?(en.parent?passages.find(p=>p.id===en.parent):null):(pid?passages.find(p=>p.id===pid):null);
   const act=isE?en.action:action;
-  MS={mode:isE?'edit':'new',parentId:isE?en.parent:pid,editId:isE?en.id:null,action:act};
-  CT=(isE?en.cultureType:(par&&par.cultureType))||'adherent';
+  const tempId=isE?null:gId(par?par.line:'NEW',act);
+  MS={mode:isE?'edit':'new',parentId:isE?en.parent:pid,editId:isE?en.id:null,action:act,_tempId:tempId,_stub:null};
   VL=[];
-  const nid=isE?en.id:gId(par?par.line:'NEW',act);
+  const nid=isE?en.id:tempId;
   const pN=isE?en.passageNum:cP(isE?en.parent:pid,act);
   const pND=(act==='thaw'||act==='inherit')?null:pN;
   const labs={thaw:'Thaw vial',inherit:'Inherit culture',passage:'Passage',freeze:'Freeze vials',experiment:'Start experiment'};
-  const sub=isE?en.id+'  ·  '+pL(en):(par?'New ID: '+nid+'  ·  from '+par.id:'New ID: '+nid);
+  const sub=isE?en.id+'  -  '+pL(en):(par?'New ID: '+nid+'  -  from '+par.id:'New ID: '+nid);
   const pd=par?par.date:null;
-  document.getElementById('mhd').innerHTML='<div class="aic" style="background:'+AC[act]+'">'+AI[act]+'</div><div><div class="mttl">'+(isE?'Edit — ':'')+labs[act]+'</div><div class="msub">'+sub+'</div></div>';
+  document.getElementById('mhd').innerHTML='<div class="aic" style="background:'+AC[act]+'">'+AI[act]+'</div><div><div class="mttl">'+(isE?'Edit - ':'')+labs[act]+'</div><div class="msub">'+sub+'</div></div>';
   const d=isE?en:{};
-  const dR=function(v){return'<div class="fr"><label>Days in culture <span class="at">auto</span>'+(pd?'<span style="font-size:10px;color:#6B6A65">parent: <b>'+pd+'</b></span>':'')+'</label><input id="fd" type="number" min="0" value="'+(v!==undefined?v:'')+'" placeholder="— picks from date —"'+(pd?' readonly style="opacity:0.7"':'')+'><div id="di" class="hint" style="display:none;color:#3B6D11"></div></div>';};
+  const dR=v=>'<div class="fr"><label>Days in culture <span class="at">auto</span>'+(pd?'<span style="font-size:10px;color:#6B6A65">parent: <b>'+pd+'</b></span>':'')+'</label><input id="fd" type="number" min="0" value="'+(v!==undefined?v:'')+'" placeholder="picks from date"'+(pd?' readonly style="opacity:0.7"':'')+'><div id="di" class="hint" style="display:none;color:#3B6D11"></div></div>';
+
+  const thawVesselIsPlate=isE&&(act==='thaw'||act==='inherit')&&d.wells&&PLATES.some(p=>d.wells.includes(p.replace('-well plate','').replace('-well','')));
+  const thawVesselIsFlask=isE&&(act==='thaw'||act==='inherit')&&d.wells&&!isPlate(d.wells)&&d.wells!=='Custom...'&&d.wells!=='';
+
   let body='';
   if(!isE&&par){body+='<div class="istrip"><div><div class="isl">Parent ID</div><div class="isv">'+par.id+'</div></div><div><div class="isl">Parent</div><div class="isv" style="font-family:inherit;font-size:13px">'+pL(par)+'</div></div><div><div class="isl">Parent date</div><div class="isv" style="font-family:inherit;font-size:12px;color:#0F6E56">'+par.date+'</div></div>'+(pND!==null?'<div><div class="isl">This P#</div><div class="isv" style="font-family:inherit;font-size:13px;color:'+AC[act]+'">P'+pND+'</div></div>':'')+'</div>';}
 
   if(act==='thaw'){
-    body+='<div class="fsec">Culture origin</div><div class="fg"><div class="fr"><label>Cell line</label><input id="fl" value="'+esc(d.line||'')+'" placeholder="e.g. HEK293"></div><div class="fr"><label>Starting passage # <span class="ot">(from vial label)</span></label><input id="fp" type="number" min="0" value="'+(d.passageNum!==undefined?d.passageNum:'')+'" placeholder="e.g. 5" oninput="updTP()"><div id="tp" class="hint" style="display:none"></div></div><div class="fr"><label>Vial / lot # / source</label><input id="flt" value="'+esc(d.vial||'')+'" placeholder="e.g. ATCC lot 2024-07"></div><div class="fr"><label>Thaw date</label><input id="fdt" type="date" value="'+esc(d.date||'')+'"></div></div>'
-      +'<div class="fsec">Culture conditions</div><div class="fg"><div class="fr"><label>Vessel</label><input id="fw" value="'+esc(d.wells||'')+'" placeholder="e.g. T75, 6-well plate"></div><div class="fr"><label>Medium / condition</label><input id="fc" value="'+esc(d.condition||'')+'" placeholder="e.g. DMEM 10% FBS"></div><div class="fr"><label>Substrate</label><input id="fsub" value="'+esc(d.substrate||'TC treated')+'" placeholder="e.g. TC treated"></div><div class="fr"><label>Operator</label><input id="fu" value="'+esc(d.user||'')+'"></div></div>'
-      +'<div class="fr"><label>Notes</label><textarea id="fn" placeholder="Viability %, recovery observations…">'+esc(d.note||'')+'</textarea></div>';
+    body+='<div class="fsec">Culture origin</div><div class="fg">'
+      +'<div class="fr"><label>Cell line</label><input id="fl" value="'+esc(d.line||'')+'" placeholder="e.g. HEK293"></div>'
+      +'<div class="fr"><label>Starting passage # <span class="ot">(from vial label)</span></label><input id="fp" type="number" min="0" value="'+(d.passageNum!==undefined?d.passageNum:'')+'" placeholder="e.g. 5" oninput="updTP()"><div id="tp" class="hint" style="display:none"></div></div>'
+      +'<div class="fr"><label>Vial / lot # / source</label><input id="flt" value="'+esc(d.vial||'')+'" placeholder="e.g. ATCC lot 2024-07"></div>'
+      +'<div class="fr"><label>Thaw date</label><input id="fdt" type="date" value="'+esc(d.date||'')+'"></div></div>'
+      +'<div class="fsec">Culture conditions</div>'
+      +'<div class="fg">'
+      +'<div class="fr"><label>Vessel</label>'+vesselDropdown(d.wells||'')+'</div>'
+      +'<div class="fr"><label>Medium / condition</label><input id="fc" value="'+esc(d.condition||'')+'" placeholder="e.g. DMEM 10% FBS"></div>'
+      +'<div class="fr"><label>Substrate</label><input id="fsub" value="'+esc(d.substrate||'TC treated')+'"></div>'
+      +'<div class="fr"><label>Operator</label><input id="fu" value="'+esc(d.user||'')+'"></div></div>'
+      +'<div id="plate-btn-row" style="margin-bottom:8px">'+(thawVesselIsPlate?'<button class="plate-btn" onclick="openPMThaw(\''+d.id+'\',\''+d.wells+'\')">View / edit plate wells</button>':'')+'</div>'
+      +'<div id="thaw-seed-row" style="display:'+(thawVesselIsFlask?'block':'none')+';margin-bottom:8px">'
+      +'<div class="fg">'
+      +'<div class="fr"><label id="thaw-seed-label" style="font-size:11px;color:var(--tx2)">Cells / cm\u00b2 (optional)</label>'
+      +seedingInputVal('thaw-seed-density','thaw-seed-density-sci','e.g. 5000',esc(d.seedingDensity||''),'updateThawHint()')
+      +'<div id="thaw-seed-hint" class="hint" style="display:none;color:#3B6D11" data-area="'+(FA[d.wells]||'')+'"></div>'
+      +'</div>'
+      +'<div class="fr"><label style="font-size:11px;color:var(--tx2)">Total cells seeded (optional)</label>'
+      +seedingInputVal('thaw-seed-total','thaw-seed-total-sci','e.g. 1\u00d710\u2076',esc(d.seedingTotal||''),'')
+      +'</div></div></div>'
+      +'<div class="fr"><label>Notes</label><textarea id="fn" placeholder="Viability %, recovery observations...">'+esc(d.note||'')+'</textarea></div>';
   } else if(act==='inherit'){
-    body+='<div class="fsec">Source &amp; history</div><div class="fg"><div class="fr"><label>Cell line</label><input id="fl" value="'+esc(d.line||'')+'" placeholder="e.g. iPSC"></div><div class="fr"><label>Passage # at receipt</label><input id="fp" type="number" min="0" value="'+(d.passageNum!==undefined?d.passageNum:'')+'" placeholder="e.g. 18" oninput="updTP()"><div id="tp" class="hint" style="display:none"></div></div><div class="fr"><label>Source lab / institution</label><input id="flt" value="'+esc(d.sourceLab||'')+'" placeholder="e.g. Dr. Smith Lab"></div><div class="fr"><label>Transfer date</label><input id="fdt" type="date" value="'+esc(d.date||'')+'"></div></div>'
-      +'<div class="fr"><label>Passage history</label><select id="fh"><option value="yes"'+(d.historyKnown==='yes'?' selected':'')+'>Yes — documented</option><option value="partial"'+(d.historyKnown==='partial'?' selected':'')+'>Partial — some records missing</option><option value="no"'+(d.historyKnown==='no'?' selected':'')+'>No — unknown</option></select></div>'
-      +'<div class="fsec">Incoming conditions</div><div class="fg"><div class="fr"><label>Vessel</label><input id="fw" value="'+esc(d.wells||'')+'" placeholder="e.g. T25, cryovial"></div><div class="fr"><label>Medium / condition</label><input id="fc" value="'+esc(d.condition||'')+'" placeholder="e.g. mTeSR1"></div><div class="fr"><label>Substrate</label><input id="fsub" value="'+esc(d.substrate||'Matrigel')+'" placeholder="e.g. Matrigel"></div><div class="fr"><label>Received by</label><input id="fu" value="'+esc(d.user||'')+'"></div></div>'
-      +'<div class="fr"><label>Notes</label><textarea id="fn" placeholder="Authentication, mycoplasma, STR profile…">'+esc(d.note||'')+'</textarea></div>';
+    body+='<div class="fsec">Source and history</div><div class="fg">'
+      +'<div class="fr"><label>Cell line</label><input id="fl" value="'+esc(d.line||'')+'" placeholder="e.g. iPSC"></div>'
+      +'<div class="fr"><label>Passage # at receipt</label><input id="fp" type="number" min="0" value="'+(d.passageNum!==undefined?d.passageNum:'')+'" placeholder="e.g. 18" oninput="updTP()"><div id="tp" class="hint" style="display:none"></div></div>'
+      +'<div class="fr"><label>Source lab / institution</label><input id="flt" value="'+esc(d.sourceLab||'')+'" placeholder="e.g. Dr. Smith Lab"></div>'
+      +'<div class="fr"><label>Transfer date</label><input id="fdt" type="date" value="'+esc(d.date||'')+'"></div></div>'
+      +'<div class="fr"><label>Passage history</label><select id="fh"><option value="yes"'+(d.historyKnown==='yes'?' selected':'')+'>Yes - documented</option><option value="partial"'+(d.historyKnown==='partial'?' selected':'')+'>Partial - some records missing</option><option value="no"'+(d.historyKnown==='no'?' selected':'')+'>No - unknown</option></select></div>'
+      +'<div class="fsec">Incoming conditions</div>'
+      +'<div class="fg">'
+      +'<div class="fr"><label>Vessel</label>'+vesselDropdown(d.wells||'')+'</div>'
+      +'<div class="fr"><label>Medium / condition</label><input id="fc" value="'+esc(d.condition||'')+'" placeholder="e.g. mTeSR1"></div>'
+      +'<div class="fr"><label>Substrate</label><input id="fsub" value="'+esc(d.substrate||'Matrigel')+'"></div>'
+      +'<div class="fr"><label>Received by</label><input id="fu" value="'+esc(d.user||'')+'"></div></div>'
+      +'<div id="plate-btn-row" style="margin-bottom:8px">'+(thawVesselIsPlate?'<button class="plate-btn" onclick="openPMThaw(\''+d.id+'\',\''+d.wells+'\')">View / edit plate wells</button>':'')+'</div>'
+      +'<div id="thaw-seed-row" style="display:'+(thawVesselIsFlask?'block':'none')+';margin-bottom:8px">'
+      +'<div class="fg">'
+      +'<div class="fr"><label id="thaw-seed-label" style="font-size:11px;color:var(--tx2)">Cells / cm\u00b2 (optional)</label>'
+      +seedingInputVal('thaw-seed-density','thaw-seed-density-sci','e.g. 5000',esc(d.seedingDensity||''),'updateThawHint()')
+      +'<div id="thaw-seed-hint" class="hint" style="display:none;color:#3B6D11" data-area="'+(FA[d.wells]||'')+'"></div>'
+      +'</div>'
+      +'<div class="fr"><label style="font-size:11px;color:var(--tx2)">Total cells seeded (optional)</label>'
+      +seedingInputVal('thaw-seed-total','thaw-seed-total-sci','e.g. 1\u00d710\u2076',esc(d.seedingTotal||''),'')
+      +'</div></div></div>'
+      +'<div class="fr"><label>Notes</label><textarea id="fn" placeholder="Authentication, mycoplasma, STR profile...">'+esc(d.note||'')+'</textarea></div>';
   } else if(act==='passage'){
     if(isE&&d.vessels&&d.vessels.length){d.vessels.forEach(v=>VL.push({id:'v'+Date.now()+Math.random().toString(36).slice(2,5),type:v.type,qty:v.qty||1,seeding:v.seeding||'',seedingTotal:v.seedingTotal||'',custom:''}));}
     body+='<div class="fsec">Passage details</div><div class="fg">'
@@ -391,27 +1031,27 @@ function openF(pid,action){
       +dR(d.days)
       +'<div class="fr"><label>Split ratio <span class="ot">optional</span></label><input id="fsp" value="'+esc(d.splitRatio||'')+'" placeholder="e.g. 1:3"></div>'
       +'<div class="fr"><label>Confluency at split % <span class="ot">optional</span></label><input id="fco" type="number" value="'+esc(d.confluency||'')+'" placeholder="e.g. 80"></div>'
-      +'<div class="fr"><label>Substrate</label><input id="fsub" value="'+esc(d.substrate||'TC treated')+'" placeholder="e.g. TC treated, Matrigel"></div>'
+      +'<div class="fr"><label>Substrate</label><input id="fsub" value="'+esc(d.substrate||'TC treated')+'"></div>'
       +'<div class="fr"><label>Operator</label><input id="fu" value="'+esc(d.user||'')+'"></div></div>'
       +'<div class="fsec">Destination vessels</div>'
-      +'<div style="font-size:11px;color:#6B6A65;margin-bottom:10px">Add one row per vessel type. Flask rows include a seeding field — plates are seeded per well in the plate viewer.</div>'
+      +'<div style="font-size:11px;color:#6B6A65;margin-bottom:10px">Add one row per vessel type. Flask rows include seeding fields. Plates are seeded per well in the plate viewer.</div>'
       +'<div class="vcards" id="vcards"></div>'
       +'<button class="avbtn" onclick="addV()"><span style="font-size:18px;line-height:1">+</span> Add vessel type</button>'
       +'<div class="vsum" id="vsum"></div>'
       +'<div class="fsec" style="margin-top:14px">Conditions</div>'
       +'<div class="fr"><label>Medium / condition</label><input id="fc" value="'+esc(d.condition||(par?par.condition:''))+'" placeholder="e.g. DMEM 10% FBS"></div>'
-      +'<div class="fr"><label>Notes</label><textarea id="fn" placeholder="Morphology, viability, any issues…">'+esc(d.note||'')+'</textarea></div>';
+      +'<div class="fr"><label>Notes</label><textarea id="fn" placeholder="Morphology, viability, any issues...">'+esc(d.note||'')+'</textarea></div>';
   } else if(act==='freeze'){
     body+='<div class="fsec">Freeze details</div><div class="fg">'
       +'<div class="fr"><label>Freeze date</label><input id="fdt" type="date" value="'+esc(d.date||'')+'" oninput="onDC()"></div>'
       +dR(d.days)
       +'<div class="fr"><label>Number of vials</label><input id="fvi" type="number" value="'+esc(d.vials||'')+'" placeholder="e.g. 4"></div>'
-      +'<div class="fr"><label>Cells per vial</label><input id="fcv" value="'+esc(d.cellsPerVial||'')+'" placeholder="e.g. 1×10⁶"></div>'
-      +'<div class="fr"><label>Cryoprotectant</label><input id="fcr" value="'+esc(d.cryo||'10% DMSO in FBS')+'" placeholder="e.g. 10% DMSO in FBS"></div>'
-      +'<div class="fr"><label>Storage location</label><input id="fst" value="'+esc(d.storage||'')+'" placeholder="e.g. LN2 tank A, box 2"></div>'
+      +'<div class="fr"><label>Cells per vial</label><input id="fcv" value="'+esc(d.cellsPerVial||'')+'" placeholder="e.g. 1\u00d710\u2076"></div>'
+      +'<div class="fr"><label>Cryoprotectant</label><input id="fcr" value="'+esc(d.cryo||'10% DMSO in FBS')+'"></div>'
+      +'<div class="fr"><label>Storage location</label><input id="fst" value="'+esc(d.storage||'')+'" placeholder="e.g. LN2 tank A box 2"></div>'
       +'<div class="fr"><label>Viability %</label><input id="fvb" type="number" value="'+esc(d.viability||'')+'" placeholder="e.g. 90"></div>'
       +'<div class="fr"><label>Operator</label><input id="fu" value="'+esc(d.user||'')+'"></div></div>'
-      +'<div class="fr"><label>Notes</label><textarea id="fn" placeholder="Reason for freeze, any notes…">'+esc(d.note||'')+'</textarea></div>';
+      +'<div class="fr"><label>Notes</label><textarea id="fn" placeholder="Reason for freeze, any notes...">'+esc(d.note||'')+'</textarea></div>';
   } else if(act==='experiment'){
     body+='<div class="fsec">Experiment</div><div class="fg">'
       +'<div class="fr"><label>Experiment ID</label><input id="fei" value="'+esc(d.expId||'')+'" placeholder="e.g. EXP-001"></div>'
@@ -419,7 +1059,7 @@ function openF(pid,action){
       +dR(d.days)
       +'<div class="fr"><label>Assay type</label><select id="fas">'+['Drug screen','Flow cytometry','ICC/IF','Western blot','qPCR','RNA-seq','Differentiation','CRISPR','Other'].map(a=>'<option'+(d.assay===a?' selected':'')+'>'+a+'</option>').join('')+'</select></div>'
       +'<div class="fr"><label>Vessel</label><input id="fw" value="'+esc(d.wells||(par?par.wells||'':''))+'" placeholder="e.g. 96-well viewplate"></div>'
-      +'<div class="fr"><label>Treatment / condition</label><input id="ftr" value="'+esc(d.treatment||'')+'" placeholder="e.g. Compound library 10µM"></div>'
+      +'<div class="fr"><label>Treatment / condition</label><input id="ftr" value="'+esc(d.treatment||'')+'" placeholder="e.g. Compound library 10uM"></div>'
       +'<div class="fr"><label>Timepoints</label><input id="ftp2" value="'+esc(d.timepoints||'')+'" placeholder="e.g. 24h, 48h, 72h"></div></div>'
       +'<div class="fr"><label>Operator</label><input id="fu" value="'+esc(d.user||'')+'"></div>'
       +'<div class="fr"><label>Hypothesis / goal</label><textarea id="fn" placeholder="What are you testing?">'+esc(d.note||'')+'</textarea></div>';
@@ -428,13 +1068,7 @@ function openF(pid,action){
   document.getElementById('mbd').innerHTML=body;
   document.getElementById('mft').innerHTML='<button class="btn" onclick="closeM()">Cancel</button>'+(isE?'<button class="btn btn-d" onclick="delR(\''+en.id+'\')">Delete</button>':'')+'<button class="btn btn-p" onclick="subF()">'+(isE?'Save changes':'Save record')+'</button>';
   document.getElementById('mbg').classList.add('on');
-
-  if(act==='passage'){
-    setTimeout(function(){
-      renderVL();
-      if(!isE){addV();}
-    },0);
-  }
+  if(act==='passage'){setTimeout(function(){renderVL();if(!isE)addV();},0);}
   if(act==='thaw'||act==='inherit')setTimeout(updTP,50);
   if(isE&&par&&d.date)setTimeout(onDC,60);
 }
@@ -445,76 +1079,100 @@ function onDC(){
   const par=MS.parentId?passages.find(p=>p.id===MS.parentId):null;
   if(!par||!par.date)return;
   const d=dBet(par.date,de.value);const info=document.getElementById('di');
-  if(d!==null){daye.value=d;daye.classList.add('af');if(info){info.textContent=de.value+' − '+par.date+' = '+d+' day'+(d!==1?'s':'');info.style.display='block';}}
+  if(d!==null){daye.value=d;daye.classList.add('af');if(info){info.textContent=de.value+' - '+par.date+' = '+d+' day'+(d!==1?'s':'');info.style.display='block';}}
   else{daye.value='';daye.classList.remove('af');if(info)info.style.display='none';}
 }
-function updTP(){const el=document.getElementById('fp'),pv=document.getElementById('tp');if(!el||!pv)return;const v=parseInt(el.value);if(!isNaN(v)&&el.value!==''){pv.textContent='Recorded as P'+v+' → first passage will be P'+(v+1)+' → P'+(v+2)+' → …';pv.style.display='block';}else pv.style.display='none';}
+
+function updTP(){const el=document.getElementById('fp'),pv=document.getElementById('tp');if(!el||!pv)return;const v=parseInt(el.value);if(!isNaN(v)&&el.value!==''){pv.textContent='Recorded as P'+v+' -> first passage will be P'+(v+1)+' -> P'+(v+2)+' -> ...';pv.style.display='block';}else pv.style.display='none';}
+
+function getThawWells(){const sel=document.getElementById('fw');const val=sel?sel.value:'';return val==='Custom...'?fv('fw-custom'):val;}
 
 function subF(){
   const ms=MS;const par=ms.parentId?passages.find(p=>p.id===ms.parentId):null;
   if(ms.mode==='edit'){
     const n=passages.find(p=>p.id===ms.editId);if(!n){closeM();return;}
     const act=n.action;
-    n.date=fv('fdt')||n.date;n.days=fi('fd');n.user=fv('fu')||n.user;n.note=fv('fn')||n.note;n.cultureType=CT;
-    if(act==='thaw'||act==='inherit'){n.wells=fv('fw');n.condition=fv('fc');n.substrate=fv('fsub');}
-    if(act==='passage'){
-      const fil=VL.filter(v=>v.type&&v.type!=='');
-      if(fil.length){n.vessels=fil.map(v=>({type:v.type==='Custom…'?(v.custom||'Custom'):v.type,vesselClass:isPlate(v.type)?'plate':'flask',qty:v.qty,seeding:v.seeding||null,seedingTotal:v.seedingTotal||null,seedingUnit:v.type==='Spinner flask'?'cells/mL':'cells/cm²'}));n.wells=fil.map(v=>'('+v.qty+') '+(v.type==='Custom…'?(v.custom||'Custom'):v.type)).join(', ');}
-      n.condition=fv('fc');n.substrate=fv('fsub');n.splitRatio=fv('fsp');n.confluency=fv('fco');
-    }
+    n.date=fv('fdt')||n.date;n.days=fi('fd');n.user=fv('fu')||n.user;n.note=fv('fn')||n.note;
+    if(act==='thaw'||act==='inherit'){n.wells=getThawWells();n.condition=fv('fc');n.substrate=fv('fsub');n.seedingDensity=fv('thaw-seed-density');n.seedingTotal=fv('thaw-seed-total');n.seedingUnit=n.wells==='Spinner flask'?'cells/mL':'cells/cm\u00b2';}
+    if(act==='passage'){const fil=VL.filter(v=>v.type&&v.type!=='');if(fil.length){n.vessels=fil.map(v=>({type:v.type==='Custom...'?(v.custom||'Custom'):v.type,vesselClass:isPlate(v.type)?'plate':'flask',qty:v.qty,seeding:v.seeding||null,seedingTotal:v.seedingTotal||null,seedingUnit:v.type==='Spinner flask'?'cells/mL':'cells/cm\u00b2'}));n.wells=fil.map(v=>'('+v.qty+') '+(v.type==='Custom...'?(v.custom||'Custom'):v.type)).join(', ');}n.condition=fv('fc');n.substrate=fv('fsub');n.splitRatio=fv('fsp');n.confluency=fv('fco');}
     if(act==='freeze'){n.vials=fv('fvi');n.cellsPerVial=fv('fcv');n.cryo=fv('fcr');n.storage=fv('fst');n.viability=fv('fvb');}
     if(act==='experiment'){n.expId=fv('fei');n.assay=fv('fas');n.treatment=fv('ftr');n.timepoints=fv('ftp2');n.wells=fv('fw');}
     closeM();renderL();toast('Record updated');return;
   }
   const line=fv('fl')||(par?par.line:'UNK');
-  const nid=gId(line,ms.action);
+  const nid=ms._tempId||gId(line,ms.action);
   const pn=(ms.action==='thaw'||ms.action==='inherit')?parseInt(fv('fp'))||0:cP(ms.parentId,ms.action)||0;
-  const rec={id:nid,parent:ms.parentId||null,line,action:ms.action,passageNum:pn,cultureType:CT,date:fv('fdt')||tod(),days:fi('fd'),condition:fv('fc')||(par?par.condition:''),note:fv('fn'),user:fv('fu'),substrate:fv('fsub')};
-  if(ms.action==='thaw'){rec.vial=fv('flt');rec.wells=fv('fw');}
-  if(ms.action==='inherit'){rec.sourceLab=fv('flt');rec.historyKnown=fv('fh');rec.wells=fv('fw');}
-  if(ms.action==='passage'){
-    const fil=VL.filter(v=>v.type&&v.type!=='');
-    if(!fil.length){alert('Please add at least one destination vessel.');return;}
-    rec.vessels=fil.map(v=>({type:v.type==='Custom…'?(v.custom||'Custom'):v.type,vesselClass:isPlate(v.type)?'plate':'flask',qty:v.qty,seeding:v.seeding||null,seedingTotal:v.seedingTotal||null,seedingUnit:v.type==='Spinner flask'?'cells/mL':'cells/cm²'}));
-    rec.wells=fil.map(v=>'('+v.qty+') '+(v.type==='Custom…'?(v.custom||'Custom'):v.type)).join(', ');
-    rec.splitRatio=fv('fsp');rec.confluency=fv('fco');
+  const rec={id:nid,parent:ms.parentId||null,line,action:ms.action,passageNum:pn,date:fv('fdt')||tod(),days:fi('fd'),condition:fv('fc')||(par?par.condition:''),note:fv('fn'),user:fv('fu'),substrate:fv('fsub')};
+  if(ms.action==='thaw'){
+    rec.vial=fv('flt');rec.wells=getThawWells();
+    rec.seedingDensity=fv('thaw-seed-density');
+    rec.seedingTotal=fv('thaw-seed-total');
+    rec.seedingUnit=rec.wells==='Spinner flask'?'cells/mL':'cells/cm\u00b2';
+    console.log('[DEBUG] PM.vesselKey:', PM.vesselKey);
+    console.log('[DEBUG] PM.allIds.length:', PM.allIds.length);
+    console.log('[DEBUG] PM.wells:', JSON.stringify(PM.wells));
+    console.log('[DEBUG] MS._stub:', MS._stub);
+    // attach plate data — read directly from PM
+    if(PM.vesselKey&&PM.allIds.length){
+      const d2={};
+      PM.allIds.forEach(function(id){if(PM.wells[id]&&(PM.wells[id].occupied||PM.wells[id].contaminated))d2[id]=PM.wells[id];});
+      if(Object.keys(d2).length){rec.plateData={};rec.plateData[PM.vesselKey]=d2;}
+    } else if(MS._stub&&MS._stub.plateData&&Object.keys(MS._stub.plateData).length){
+      rec.plateData=MS._stub.plateData;
+    }
   }
+  if(ms.action==='inherit'){
+    rec.sourceLab=fv('flt');rec.historyKnown=fv('fh');rec.wells=getThawWells();
+    rec.seedingDensity=fv('thaw-seed-density');
+    rec.seedingTotal=fv('thaw-seed-total');
+    rec.seedingUnit=rec.wells==='Spinner flask'?'cells/mL':'cells/cm²';
+    if(PM.vesselKey&&PM.allIds.length){
+      const d3={};
+      PM.allIds.forEach(function(id){if(PM.wells[id]&&(PM.wells[id].occupied||PM.wells[id].contaminated))d3[id]=PM.wells[id];});
+      if(Object.keys(d3).length){rec.plateData={};rec.plateData[PM.vesselKey]=d3;}
+    } else if(MS._stub&&MS._stub.plateData&&Object.keys(MS._stub.plateData).length){
+      rec.plateData=MS._stub.plateData;
+    }
+  }
+  if(ms.action==='passage'){const fil=VL.filter(v=>v.type&&v.type!=='');if(!fil.length){alert('Please add at least one destination vessel.');return;}rec.vessels=fil.map(v=>({type:v.type==='Custom...'?(v.custom||'Custom'):v.type,vesselClass:isPlate(v.type)?'plate':'flask',qty:v.qty,seeding:v.seeding||null,seedingTotal:v.seedingTotal||null,seedingUnit:v.type==='Spinner flask'?'cells/mL':'cells/cm\u00b2'}));rec.wells=fil.map(v=>'('+v.qty+') '+(v.type==='Custom...'?(v.custom||'Custom'):v.type)).join(', ');rec.splitRatio=fv('fsp');rec.confluency=fv('fco');}
   if(ms.action==='freeze'){rec.vials=fv('fvi');rec.cellsPerVial=fv('fcv');rec.cryo=fv('fcr');rec.storage=fv('fst');rec.viability=fv('fvb');}
   if(ms.action==='experiment'){rec.expId=fv('fei');rec.assay=fv('fas');rec.treatment=fv('ftr');rec.timepoints=fv('ftp2');rec.wells=fv('fw');}
-  passages.push(rec);updLF();closeM();renderL();toast(AL[ms.action]+' record saved — '+nid);
+  passages.push(rec);updLF();closeM();renderL();toast(AL[ms.action]+' record saved - '+nid);
 }
 
-function delR(id){if(passages.some(p=>p.parent===id)){alert('Cannot delete — child passages branch from this record.');return;}if(!confirm('Delete this record? This cannot be undone.'))return;passages=passages.filter(p=>p.id!==id);updLF();closeM();renderL();toast('Record deleted');}
+function delR(id){if(passages.some(p=>p.parent===id)){alert('Cannot delete - child passages branch from this record.');return;}if(!confirm('Delete this record? This cannot be undone.'))return;passages=passages.filter(p=>p.id!==id);updLF();closeM();renderL();toast('Record deleted');}
 function closeM(){document.getElementById('mbg').classList.remove('on');}
 
+// ── log ──
 function renderLog(){
   const f=document.getElementById('lgf').value;const rows=f==='all'?passages:passages.filter(p=>p.line===f);
-  const fs=function(n){if(!n.vessels)return n.seedingDensity?n.seedingDensity+' '+(n.seedingUnit||'cells/cm²'):'—';const s=n.vessels.filter(v=>v.seeding&&v.vesselClass==='flask').map(v=>v.seeding+' '+v.seedingUnit).filter((v,i,a)=>a.indexOf(v)===i).join(', ');return s||'—';};
-  document.getElementById('lb').innerHTML=rows.map(function(n){return'<tr onclick="openF(\''+n.id+'\',\'edit\')">'
+  const fs=n=>{if(!n.vessels)return n.seedingDensity||'--';const s=n.vessels.filter(v=>v.seeding&&v.vesselClass==='flask').map(v=>v.seeding).filter((v,i,a)=>a.indexOf(v)===i).join(', ');return s||'--';};
+  document.getElementById('lb').innerHTML=rows.map(n=>'<tr onclick="openF(\''+n.id+'\',\'edit\')">'
     +'<td class="mono" style="color:'+AC[n.action]+'">'+n.id+'</td><td>'+n.line+'</td><td style="font-weight:500">'+pL(n)+'</td>'
     +'<td><span class="ap" style="background:'+AF[n.action]+';color:'+AC[n.action]+'">'+n.action+'</span></td>'
     +'<td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+vLbl(n)+'</td>'
     +'<td>'+n.date+'</td><td style="font-weight:500;color:'+(n.days>0?'#1A1915':'#6B6A65')+'">'+n.days+'d</td>'
-    +'<td style="color:#6B6A65">'+(n.splitRatio||'—')+'</td>'
-    +'<td style="color:#6B6A65;white-space:nowrap">'+fs(n)+'</td></tr>';}).join('');
+    +'<td style="color:#6B6A65">'+(n.splitRatio||'--')+'</td>'
+    +'<td style="color:#6B6A65;white-space:nowrap">'+fs(n)+'</td></tr>').join('');
 }
 
+// ── overview ──
 function renderOV(){
-  const avgD=passages.filter(p=>p.days>0).reduce(function(s,p){return s+p.days;},0)/Math.max(1,passages.filter(p=>p.days>0).length);
+  const avgD=passages.filter(p=>p.days>0).reduce((s,p)=>s+p.days,0)/Math.max(1,passages.filter(p=>p.days>0).length);
   const lines=[...new Set(passages.map(p=>p.line))];
   document.getElementById('sg').innerHTML='<div class="sc"><div class="sl">Total records</div><div class="sv">'+passages.length+'</div></div><div class="sc"><div class="sl">Avg days / passage</div><div class="sv">'+avgD.toFixed(1)+'d</div></div><div class="sc"><div class="sl">Freeze stocks</div><div class="sv">'+passages.filter(p=>p.action==='freeze').length+'</div></div><div class="sc"><div class="sl">Experiments</div><div class="sv">'+passages.filter(p=>p.action==='experiment').length+'</div></div><div class="sc"><div class="sl">Cell lines</div><div class="sv">'+lines.length+'</div></div>';
   let h='<div style="font-size:13px;font-weight:500;margin:4px 0 8px">By cell line</div>';
-  lines.forEach(function(line){const lp=passages.filter(p=>p.line===line);const ld=lp.filter(p=>p.days>0),la=ld.length?(ld.reduce(function(s,p){return s+p.days;},0)/ld.length).toFixed(1):'—';const mxP=Math.max(...lp.map(p=>p.passageNum||0));h+='<div style="background:'+lc(line,true)+';border-radius:6px;padding:10px 12px;margin-bottom:10px"><div style="font-size:13px;font-weight:500;color:'+lc(line,false)+';margin-bottom:6px">'+line+' <span style="font-size:11px;font-weight:400;color:#6B6A65">max P'+mxP+' · avg '+la+'d/passage · '+lp.length+' records</span></div>'+lp.map(function(n){const vl=vLbl(n);return'<div style="display:flex;gap:8px;align-items:center;font-size:11px;padding:3px 0;border-bottom:0.5px solid rgba(0,0,0,0.06)"><span class="mono" style="color:'+AC[n.action]+';min-width:110px">'+n.id+'</span><span style="min-width:50px;font-weight:500">'+pL(n)+'</span><span style="min-width:24px;color:'+(n.days>0?'#3B6D11':'#6B6A65')+'">'+n.days+'d</span>'+(n.splitRatio?'<span style="color:#6B6A65">split '+n.splitRatio+'</span>':'')+(vl?'<span style="color:#6B6A65;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+vl+'</span>':'')+'<span style="color:#6B6A65;flex-shrink:0;margin-left:auto">'+n.date+'</span></div>';}).join('')+'</div>';});
+  lines.forEach(line=>{const lp=passages.filter(p=>p.line===line);const ld=lp.filter(p=>p.days>0),la=ld.length?(ld.reduce((s,p)=>s+p.days,0)/ld.length).toFixed(1):'--';const mxP=Math.max(...lp.map(p=>p.passageNum||0));h+='<div style="background:'+lc(line,true)+';border-radius:6px;padding:10px 12px;margin-bottom:10px"><div style="font-size:13px;font-weight:500;color:'+lc(line,false)+';margin-bottom:6px">'+line+' <span style="font-size:11px;font-weight:400;color:#6B6A65">max P'+mxP+' avg '+la+'d/passage '+lp.length+' records</span></div>'+lp.map(n=>{const vl=vLbl(n);return'<div style="display:flex;gap:8px;align-items:center;font-size:11px;padding:3px 0;border-bottom:0.5px solid rgba(0,0,0,0.06)"><span class="mono" style="color:'+AC[n.action]+';min-width:110px">'+n.id+'</span><span style="min-width:50px;font-weight:500">'+pL(n)+'</span><span style="min-width:24px;color:'+(n.days>0?'#3B6D11':'#6B6A65')+'">'+n.days+'d</span>'+(n.splitRatio?'<span style="color:#6B6A65">split '+n.splitRatio+'</span>':'')+(vl?'<span style="color:#6B6A65;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+vl+'</span>':'')+'<span style="color:#6B6A65;flex-shrink:0;margin-left:auto">'+n.date+'</span></div>';}).join('')+'</div>';});
   document.getElementById('gs').innerHTML=h;
 }
 
-function toast(msg){const t=document.createElement('div');t.textContent=msg;Object.assign(t.style,{position:'fixed',bottom:'20px',right:'20px',background:'#1A1915',color:'#fff',padding:'8px 16px',borderRadius:'8px',fontSize:'12px',zIndex:400,transition:'opacity 0.4s',boxShadow:'0 4px 12px rgba(0,0,0,0.15)'});document.body.appendChild(t);setTimeout(function(){t.style.opacity='0';setTimeout(function(){t.remove();},400);},2400);}
+function toast(msg){const t=document.createElement('div');t.textContent=msg;Object.assign(t.style,{position:'fixed',bottom:'20px',right:'20px',background:'#1A1915',color:'#fff',padding:'8px 16px',borderRadius:'8px',fontSize:'12px',zIndex:400,transition:'opacity 0.4s',boxShadow:'0 4px 12px rgba(0,0,0,0.15)'});document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),400);},2400);}
 
-window.addEventListener('load',function(){
+window.addEventListener('load',()=>{
   const z=document.getElementById('dz');
-  z.addEventListener('dragover',function(e){e.preventDefault();z.classList.add('dov');});
-  z.addEventListener('dragleave',function(){z.classList.remove('dov');});
-  z.addEventListener('drop',function(e){e.preventDefault();z.classList.remove('dov');const f=e.dataTransfer.files[0];if(f)loadF(f);});
+  z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('dov');});
+  z.addEventListener('dragleave',()=>z.classList.remove('dov'));
+  z.addEventListener('drop',e=>{e.preventDefault();z.classList.remove('dov');const f=e.dataTransfer.files[0];if(f)loadF(f);});
   renderL();
 });
 </script>
