@@ -180,6 +180,36 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .seed-total-over input{border-color:var(--red)!important;background:var(--rl)!important}
 .wells-seeded-row{display:flex;gap:6px;align-items:center;margin-top:4px;font-size:11px;color:var(--tx2)}
 .wells-seeded-row input{width:60px;font-size:12px;padding:4px 6px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;text-align:center}
+
+.mapper-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:flex-start;justify-content:center;padding-top:30px}
+.mapper-modal-bg.on{display:flex}
+.mapper-modal{background:var(--bg);border-radius:var(--rl2);border:0.5px solid var(--bd);width:760px;max-width:97vw;max-height:92vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.2)}
+.mapper-hd{padding:14px 16px;border-bottom:0.5px solid var(--bd);position:sticky;top:0;background:var(--bg);z-index:1}
+.mapper-body{padding:14px 16px}
+.mapper-ft{padding:10px 16px 14px;border-top:0.5px solid var(--bd);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:var(--bg)}
+.mapper-grid{display:grid;grid-template-columns:200px 1fr 140px;gap:8px;align-items:center;margin-bottom:6px;font-size:12px}
+.mapper-grid-hdr{font-size:11px;font-weight:500;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;display:grid;grid-template-columns:200px 1fr 140px;gap:8px}
+.mapper-field-name{font-weight:500;color:var(--tx)}
+.mapper-req{color:var(--red);font-size:10px;margin-left:3px}
+.mapper-select{font-size:12px;padding:5px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%}
+.mapper-sample{font-size:11px;color:var(--tx2);font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mapper-section{font-size:11px;font-weight:500;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;margin:14px 0 8px;padding-bottom:4px;border-bottom:0.5px solid var(--bd)}
+.mapper-sheet-sel{font-size:12px;padding:6px 10px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;margin-bottom:12px}
+.mapper-action-map{background:var(--bg2);border-radius:var(--r);padding:10px;margin-top:10px;font-size:12px}
+
+.mapper-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:flex-start;justify-content:center;padding-top:30px}
+.mapper-bg.on{display:flex}
+.mapper-modal{background:var(--bg);border-radius:var(--rl2);border:0.5px solid var(--bd);width:760px;max-width:97vw;max-height:92vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.2)}
+.mapper-hd{padding:14px 16px;border-bottom:0.5px solid var(--bd);position:sticky;top:0;background:var(--bg);z-index:1}
+.mapper-body{padding:14px 16px}
+.mapper-ft{padding:10px 16px 14px;border-top:0.5px solid var(--bd);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:var(--bg)}
+.mapper-grid{display:grid;grid-template-columns:200px 1fr 140px;gap:8px;align-items:center;margin-bottom:6px}
+.mapper-grid-hdr{font-size:11px;font-weight:500;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;display:grid;grid-template-columns:200px 1fr 140px;gap:8px}
+.mapper-field{font-size:12px;font-weight:500;color:var(--tx)}
+.mapper-req{color:var(--red);font-size:10px;margin-left:2px}
+.mapper-sel{font-size:12px;padding:5px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%}
+.mapper-sample{font-size:11px;color:var(--tx2);font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mapper-section{font-size:11px;font-weight:500;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;margin:14px 0 8px;padding-bottom:4px;border-bottom:0.5px solid var(--bd)}
 </style>
 </head>
 <body>
@@ -293,6 +323,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
+
+<!-- COLUMN MAPPER MODAL -->
+<div id="mapper-bg" class="mapper-bg">
+  <div class="mapper-modal">
+    <div class="mapper-hd">
+      <div style="font-size:14px;font-weight:500">Map Excel columns to TC Tracker fields</div>
+      <div style="font-size:12px;color:var(--tx2);margin-top:3px" id="mapper-sub"></div>
+    </div>
+    <div class="mapper-body" id="mapper-body"></div>
+    <div class="mapper-ft">
+      <button class="btn" onclick="closeMapper()">Cancel</button>
+      <button class="btn btn-p" onclick="runMappedImport()">Import</button>
+    </div>
+  </div>
+</div>
 <div id="pmbg" class="pmbg" onclick="if(event.target===this)closePM()">
   <div class="pmodal">
     <div class="pmhd">
@@ -2120,47 +2165,41 @@ function doExcelExport() {
 }
 
 
-function handleXlsxFile(e) {
-  const file = e.target.files[0];
-  if(!file) return;
-  const ir = document.getElementById('xlir');
-  if(ir){ ir.className='ires'; ir.textContent='Uploading...'; ir.style.display='block'; }
+// Column mapper state
+var MSTATE = {sheets:[], preview:{}, sheet:''};
+var MFIELDS = [
+  {k:'id',l:'Record ID',req:1,kw:['id','record id','record_id','passage id','uid','sample id']},
+  {k:'line',l:'Cell line',req:1,kw:['line','cell line','cell_line','cell type','strain','cells']},
+  {k:'action',l:'Action / type',req:1,kw:['action','type','event','record type','procedure']},
+  {k:'date',l:'Date',req:1,kw:['date','passage date','thaw date','start date','collection date','split date']},
+  {k:'parent',l:'Parent ID',req:0,kw:['parent','parent id','parent_id','source id','source']},
+  {k:'passageNum',l:'Passage number',req:0,kw:['passage','p#','passage num','passage number','pnum','p number','passage #']},
+  {k:'days',l:'Days in culture',req:0,kw:['days','days in culture','duration','culture days']},
+  {k:'condition',l:'Media / condition',req:0,kw:['media','medium','condition','media type','growth media']},
+  {k:'substrate',l:'Substrate',req:0,kw:['substrate','coating','surface']},
+  {k:'wells',l:'Vessel(s)',req:0,kw:['vessel','flask','plate','wells','format','container']},
+  {k:'splitRatio',l:'Split ratio',req:0,kw:['split','ratio','split ratio','dilution']},
+  {k:'confluency',l:'Confluency %',req:0,kw:['confluency','confluence','%confluent','percent confluent']},
+  {k:'seedingTotal',l:'Total cells seeded',req:0,kw:['total seeded','cells seeded','seeding total','seeded']},
+  {k:'totalViableCells',l:'Total viable cells',req:0,kw:['total viable','viable cells','total cells','cell count','harvest','yield']},
+  {k:'viableCellsPerMl',l:'Viable cells/mL',req:0,kw:['cells/ml','viable cells/ml','concentration']},
+  {k:'viabilityPct',l:'Viability %',req:0,kw:['viability','viable %','% viable','trypan']},
+  {k:'volumeMl',l:'Volume (mL)',req:0,kw:['volume','ml','vol','volume ml','harvest volume']},
+  {k:'user',l:'Operator',req:0,kw:['operator','user','by','performed by','scientist','researcher','name']},
+  {k:'note',l:'Notes',req:0,kw:['note','notes','comment','comments','observation','remarks']},
+  {k:'project',l:'Project',req:0,kw:['project','grant','study','experiment name','protocol']},
+];
+function fuzzyMatch(h,kws){var s=h.toLowerCase().replace(/[^a-z0-9]/g,' ').trim();return kws.some(function(k){return s===k||s.indexOf(k)>=0||k.indexOf(s)>=0;});}
+function autoDetect(headers){var m={};MFIELDS.forEach(function(f){var h=headers.find(function(h){return fuzzyMatch(h,f.kw);});if(h)m[f.k]=h;});return m;}
+function getSample(samples,headers,col){var idx=headers.indexOf(col);if(idx<0||!samples.length)return '';return String(samples[0][idx]||'').slice(0,28);}
+function refreshSample(fk){var sel=document.getElementById('map-'+fk);var col=sel?sel.value:'';var prev=MSTATE.preview[MSTATE.sheet]||{headers:[],sample_rows:[]};var el=document.getElementById('msmp-'+fk);if(el)el.textContent=getSample(prev.sample_rows,prev.headers,col);}
+function onSheetChange(sheet){MSTATE.sheet=sheet;openMapper();}
+function closeMapper(){document.getElementById('mapper-bg').classList.remove('on');}
+function mrow(f,headers,samples,auto){var sv=auto[f.k]||'';var sample=sv?getSample(samples,headers,sv):'';var opts='<option value="">-- skip --</option>'+headers.map(function(h){return '<option value="'+h+'"'+(h===sv?' selected':'')+'>'+h+'</option>';}).join('');return '<div class="mapper-grid"><div class="mapper-field">'+f.l+(f.req?'<span class="mapper-req">*</span>':'')+'</div><select class="mapper-sel" id="map-'+f.k+'" onchange="refreshSample(\''+f.k+'\')">'+opts+'</select><div class="mapper-sample" id="msmp-'+f.k+'">'+sample+'</div></div>';}
+function openMapper(){var sheet=MSTATE.sheet;var prev=MSTATE.preview[sheet]||{headers:[],sample_rows:[]};var headers=prev.headers;var samples=prev.sample_rows;var auto=autoDetect(headers);document.getElementById('mapper-sub').textContent=headers.length+' columns in \u201c'+sheet+'\u201d';var body='';if(MSTATE.sheets.length>1){body+='<div style="margin-bottom:12px"><label style="font-size:11px;color:var(--tx2);display:block;margin-bottom:4px">Sheet:</label><select onchange="onSheetChange(this.value)" style="font-size:12px;padding:5px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit">';MSTATE.sheets.forEach(function(s){body+='<option value="'+s+'"'+(s===sheet?' selected':'')+'>'+s+'</option>';});body+='</select></div>';}body+='<div class="mapper-grid-hdr"><span>TC Tracker field</span><span>Your column</span><span>Sample value</span></div>';body+='<div style="font-size:11px;font-weight:500;color:var(--red);margin-bottom:8px">Required</div>';MFIELDS.filter(function(f){return f.req;}).forEach(function(f){body+=mrow(f,headers,samples,auto);});body+='<div class="mapper-section">Optional</div>';MFIELDS.filter(function(f){return !f.req;}).forEach(function(f){body+=mrow(f,headers,samples,auto);});body+='<div class="mapper-section">Action value mapping</div><div style="font-size:12px;color:var(--tx2);margin-bottom:8px">Map your action values to TC Tracker actions. Leave blank if they already match.</div><div style="display:grid;grid-template-columns:120px 1fr;gap:8px;margin-bottom:4px"><div style="font-size:11px;font-weight:500;color:var(--tx2)">TC Tracker</div><div style="font-size:11px;font-weight:500;color:var(--tx2)">Your value(s), comma-separated</div></div>';['thaw','inherit','passage','freeze','experiment'].forEach(function(a){body+='<div style="display:grid;grid-template-columns:120px 1fr;gap:8px;margin-bottom:6px;align-items:center"><div style="font-size:12px;font-weight:500">'+a.charAt(0).toUpperCase()+a.slice(1)+'</div><input class="mapper-sel" id="amap-'+a+'" placeholder="e.g. '+a+'"></div>';});body+='<div style="margin-top:10px;display:flex;align-items:center;gap:8px;font-size:12px"><label style="color:var(--tx2)">Default action:</label><select id="mapper-default" class="mapper-sel" style="width:140px"><option value="passage" selected>passage</option><option value="thaw">thaw</option><option value="experiment">experiment</option><option value="freeze">freeze</option></select></div>';document.getElementById('mapper-body').innerHTML=body;document.getElementById('mapper-bg').classList.add('on');}
+function runMappedImport(){var cols={};MFIELDS.forEach(function(f){var el=document.getElementById('map-'+f.k);if(el&&el.value)cols[f.k]=el.value;});var missing=MFIELDS.filter(function(f){return f.req&&!cols[f.k];});if(missing.length){alert('Please map: '+missing.map(function(f){return f.l;}).join(', '));return;}var amap={};['thaw','inherit','passage','freeze','experiment'].forEach(function(a){var el=document.getElementById('amap-'+a);if(el&&el.value.trim())el.value.split(',').forEach(function(v){var t=v.trim();if(t)amap[t]=a;});});var defAction=(document.getElementById('mapper-default')||{}).value||'passage';fetch('/import-excel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sheet:MSTATE.sheet,columns:cols,action_map:amap,default_action:defAction})}).then(function(r){return r.json();}).then(function(data){if(data.error){alert('Import error: '+data.error);return;}var incoming=data.passages||[];closeMapper();var ir=document.getElementById('xlir');if(passages.length===0){importXlsxData(incoming,data.projects||[],ir);}else{var choice=confirm('Found '+incoming.length+' records. OK = Replace all  |  Cancel = Merge');if(choice)importXlsxData(incoming,data.projects||[],ir);else mergeXlsxData(incoming,data.projects||[],ir);}}).catch(function(err){alert('Import failed: '+err.message);});}
+function handleXlsxFile(e){var file=e.target.files[0];if(!file)return;var ir=document.getElementById('xlir');if(ir){ir.className='ires';ir.textContent='Reading file...';ir.style.display='block';}var fd=new FormData();fd.append('file',file);fetch('/preview-excel',{method:'POST',body:fd}).then(function(r){return r.json();}).then(function(data){if(data.error){if(ir){ir.className='ires err';ir.textContent='Error: '+data.error;}return;}if(ir)ir.style.display='none';MSTATE.sheets=data.sheets;MSTATE.preview=data.preview;MSTATE.sheet=data.sheets[0];openMapper();}).catch(function(err){if(ir){ir.className='ires err';ir.textContent='Failed - is server.py running?';}console.error(err);});}
 
-  const formData = new FormData();
-  formData.append('file', file);
-
-  fetch('/import-excel', {method:'POST', body:formData})
-    .then(function(r){ return r.json(); })
-    .then(function(data){
-      if(data.error){
-        if(ir){ ir.className='ires err'; ir.textContent='Error: '+data.error; }
-        return;
-      }
-      const incoming = data.passages || [];
-      const incomingProjects = data.projects || [];
-      if(!incoming.length){
-        if(ir){ ir.className='ires err'; ir.textContent='No records found in Excel file.'; }
-        return;
-      }
-
-      if(passages.length === 0){
-        // nothing to merge — just load
-        importXlsxData(incoming, incomingProjects, ir);
-      } else {
-        // ask user what to do
-        const choice = confirm('Found ' + incoming.length + ' records in Excel. OK = Replace all  |  Cancel = Merge (add new, update existing by ID)');
-        if(choice){
-          importXlsxData(incoming, incomingProjects, ir);
-        } else {
-          mergeXlsxData(incoming, incomingProjects, ir);
-        }
-      }
-    })
-    .catch(function(e){
-      if(ir){ ir.className='ires err'; ir.textContent='Import failed — is server.py running?'; }
-      console.error(e);
-    });
-}
 
 function importXlsxData(incoming, incomingProjects, ir) {
   passages = incoming;
