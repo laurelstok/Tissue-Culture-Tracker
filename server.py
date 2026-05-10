@@ -234,6 +234,139 @@ def build_excel(data):
     return buf.read()
 
 
+def parse_xlsx(file_bytes):
+    from openpyxl import load_workbook
+    import io
+
+    wb = load_workbook(io.BytesIO(file_bytes), data_only=True)
+    passages = {}  # id -> record dict
+
+    # ── Sheet 1: Records ────────────────────────────────────────────────────
+    if 'Records' in wb.sheetnames:
+        ws = wb['Records']
+        headers = [str(c.value).strip() if c.value else '' for c in ws[1]]
+        def col(row, name):
+            try:
+                idx = headers.index(name)
+                v = row[idx].value
+                return str(v).strip() if v is not None else ''
+            except (ValueError, IndexError):
+                return ''
+
+        for row in ws.iter_rows(min_row=2):
+            rec_id = col(row, 'Record ID')
+            if not rec_id or rec_id == 'None':
+                continue
+            action = col(row, 'Action')
+            rec = {
+                'id':             rec_id,
+                'parent':         col(row, 'Parent ID') or None,
+                'line':           col(row, 'Line'),
+                'project':        col(row, 'Project'),
+                'action':         action,
+                'passageNum':     int(float(col(row, 'P#'))) if col(row, 'P#') else 0,
+                'date':           col(row, 'Date'),
+                'days':           int(float(col(row, 'Days'))) if col(row, 'Days') else 0,
+                'condition':      col(row, 'Condition'),
+                'substrate':      col(row, 'Substrate'),
+                'wells':          col(row, 'Vessel(s)'),
+                'splitRatio':     col(row, 'Split ratio'),
+                'confluency':     col(row, 'Confluency %'),
+                'seedingDensity': col(row, 'Seeding density'),
+                'seedingTotal':   col(row, 'Total seeded'),
+                'viableCellsPerMl': col(row, 'Viable cells/mL'),
+                'viabilityPct':   col(row, '% Viability'),
+                'volumeMl':       col(row, 'Volume mL'),
+                'totalViableCells': col(row, 'Total viable cells'),
+                'user':           col(row, 'Operator'),
+                'note':           col(row, 'Notes'),
+                'feeds':          [],
+                'images':         [],
+                'plateData':      {},
+            }
+            # action-specific fields
+            if action == 'thaw':
+                rec['vial'] = col(row, 'Vessel(s)')
+            if action == 'freeze':
+                rec['vials']       = col(row, 'Vials')
+                rec['cellsPerVial'] = col(row, 'Cells/vial')
+                rec['cryo']        = col(row, 'Cryoprotectant')
+                rec['storage']     = col(row, 'Storage')
+                rec['viability']   = col(row, 'Vial viability %')
+            if action == 'experiment':
+                rec['expId']      = col(row, 'Exp ID')
+                rec['assay']      = col(row, 'Assay')
+                rec['treatment']  = col(row, 'Treatment')
+                rec['timepoints'] = col(row, 'Timepoints')
+            passages[rec_id] = rec
+
+    # ── Sheet 2: Feed log ───────────────────────────────────────────────────
+    if 'Feed log' in wb.sheetnames:
+        ws = wb['Feed log']
+        headers = [str(c.value).strip() if c.value else '' for c in ws[1]]
+        def fcol(row, name):
+            try:
+                idx = headers.index(name)
+                v = row[idx].value
+                return str(v).strip() if v is not None else ''
+            except (ValueError, IndexError):
+                return ''
+        for row in ws.iter_rows(min_row=2):
+            rec_id = fcol(row, 'Record ID')
+            if rec_id and rec_id in passages:
+                feed = {
+                    'date':     fcol(row, 'Feed date'),
+                    'media':    fcol(row, 'Media type'),
+                    'volumeMl': fcol(row, 'Volume mL'),
+                    'user':     fcol(row, 'Operator'),
+                    'note':     fcol(row, 'Notes'),
+                    'mediaCat': fcol(row, 'Cat #'),
+                    'mediaLot': fcol(row, 'Lot #'),
+                    'mediaExp': fcol(row, 'Expiration'),
+                }
+                if any(feed.values()):
+                    passages[rec_id]['feeds'].append(feed)
+
+    # ── Sheet 3: Plate wells ─────────────────────────────────────────────────
+    if 'Plate wells' in wb.sheetnames:
+        ws = wb['Plate wells']
+        headers = [str(c.value).strip() if c.value else '' for c in ws[1]]
+        def wcol(row, name):
+            try:
+                idx = headers.index(name)
+                v = row[idx].value
+                return str(v).strip() if v is not None else ''
+            except (ValueError, IndexError):
+                return ''
+        for row in ws.iter_rows(min_row=2):
+            rec_id   = wcol(row, 'Record ID')
+            plate_key = wcol(row, 'Plate key')
+            well_id   = wcol(row, 'Well')
+            if rec_id and rec_id in passages and plate_key and well_id:
+                if plate_key not in passages[rec_id]['plateData']:
+                    passages[rec_id]['plateData'][plate_key] = {}
+                passages[rec_id]['plateData'][plate_key][well_id] = {
+                    'seeding':      wcol(row, 'Seeding density'),
+                    'count':        wcol(row, 'Cell count'),
+                    'cond':         wcol(row, 'Condition'),
+                    'treat':        wcol(row, 'Treatment'),
+                    'note':         wcol(row, 'Notes'),
+                    'occupied':     True,
+                    'contaminated': wcol(row, 'Contaminated').lower() == 'yes',
+                }
+
+    # ── Projects sheet ───────────────────────────────────────────────────────
+    projects = []
+    if 'Projects' in wb.sheetnames:
+        ws = wb['Projects']
+        for row in ws.iter_rows(min_row=2):
+            v = row[0].value
+            if v: projects.append(str(v).strip())
+
+    return {
+        'passages': list(passages.values()),
+        'projects': projects,
+    }
 class TCHandler(SimpleHTTPRequestHandler):
 
     def do_POST(self):
@@ -242,6 +375,8 @@ class TCHandler(SimpleHTTPRequestHandler):
             self.handle_upload()
         elif parsed.path == '/export-excel':
             self.handle_excel_export()
+        elif parsed.path == '/import-excel':
+            self.handle_excel_import()
         else:
             self.send_error(404, 'Not found')
 
@@ -289,6 +424,25 @@ class TCHandler(SimpleHTTPRequestHandler):
             print('  [upload error]', e)
             self.send_json(500, {'error': str(e)})
 
+    def handle_excel_import(self):
+        try:
+            ct = self.headers.get('Content-Type', '')
+            if 'multipart/form-data' not in ct:
+                self.send_json(400, {'error': 'Expected multipart/form-data'}); return
+            form = cgi.FieldStorage(fp=self.rfile, headers=self.headers,
+                environ={'REQUEST_METHOD':'POST','CONTENT_TYPE':ct})
+            if 'file' not in form:
+                self.send_json(400, {'error': 'No file field'}); return
+            fi = form['file']
+            file_bytes = fi.file.read()
+            result = parse_xlsx(file_bytes)
+            print('  [import-excel] {} records, {} projects'.format(
+                len(result['passages']), len(result['projects'])))
+            self.send_json(200, result)
+        except Exception as e:
+            import traceback; traceback.print_exc()
+            self.send_json(500, {'error': str(e)})
+
     def send_json(self, code, data):
         body = json.dumps(data).encode()
         self.send_response(code)
@@ -311,7 +465,7 @@ class TCHandler(SimpleHTTPRequestHandler):
 
 
 if __name__ == '__main__':
-    port = 8080
+    port = 8081
     server = HTTPServer(('localhost', port), TCHandler)
     print('TC Tracker running at http://localhost:{}'.format(port))
     print('Images folder: {}'.format(UPLOAD_DIR))
@@ -320,3 +474,4 @@ if __name__ == '__main__':
         server.serve_forever()
     except KeyboardInterrupt:
         print('\nStopped.')
+
