@@ -305,7 +305,33 @@ def parse_xlsx_with_mapping(file_bytes, mapping):
             'treatment': get_val(row, 'treatment'), 'timepoints': get_val(row, 'timepoints'),
             'feeds': [], 'images': [], 'plateData': {},
         }
+        # build vessels array from type + qty
+        vessel_type = rec.get('wells','')
+        vessel_qty_str = get_val(row, 'vesselQty')
+        if vessel_type:
+            try: vessel_qty = int(float(vessel_qty_str)) if vessel_qty_str else 1
+            except: vessel_qty = 1
+            vessel_class = 'plate' if any(p in vessel_type.lower() for p in ['well','plate','wp']) else 'flask'
+            rec['vessels'] = [{'type': vessel_type, 'vesselClass': vessel_class, 'qty': vessel_qty,
+                               'seeding': rec.get('seedingDensity') or None,
+                               'seedingTotal': rec.get('seedingTotal') or None,
+                               'seedingUnit': 'cells/cm2'}]
+            rec['wells'] = '({}) {}'.format(vessel_qty, vessel_type)
         passages.append(rec)
+    # clean up parents: thaw/inherit records pointing to non-existent IDs
+    # are legitimately parentless (pointing to a physical vial, not a record)
+    passage_ids = {r['id'] for r in passages}
+    for rec in passages:
+        if rec.get('parent') and rec['parent'] not in passage_ids:
+            if rec.get('action') in ('thaw', 'inherit'):
+                # store vial reference in note/vial field, clear parent
+                if not rec.get('vial'): rec['vial'] = rec['parent']
+                rec['parent'] = None
+            # for passages with multiple parents (semicolon separated), take first
+            elif rec.get('parent') and (';' in rec['parent'] or '+' in rec['parent']):
+                parts = [p.strip() for p in rec['parent'].replace('+',';').split(';') if p.strip()]
+                # use first part that exists, else clear
+                rec['parent'] = next((p for p in parts if p in passage_ids), None)
     return {'passages': passages, 'projects': []}
 
 

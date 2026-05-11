@@ -282,6 +282,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="ires" id="ir" style="display:none"></div>
   </div>
   <div class="iosec">
+    <div class="iotitle">Data quality</div>
+    <div class="iodesc">Checks for broken parent references, duplicate IDs, and missing required fields.</div>
+    <button class="btn" onclick="runDQ()">&#10003; Run check</button>
+    <div id="dq-results" style="margin-top:10px"></div>
+  </div>
+  <div class="iosec">
     <div class="iotitle">Projects</div>
     <div class="iodesc">Manage the project list available in the thaw and inherit forms.</div>
     <div id="proj-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
@@ -531,7 +537,7 @@ function showIR(ok,msg){const e=document.getElementById('ir');if(!e)return;e.cla
 function refreshIO(){const json=JSON.stringify(bld(),null,2);const fn=document.getElementById('efn');if(fn)fn.textContent='tc-records-'+tod()+'.json';const pv=document.getElementById('jpv');if(pv)pv.textContent=json.slice(0,600)+(json.length>600?'\n\n... ('+passages.length+' records total)':'');}
 
 // ── tabs ──
-function showTab(id,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));document.getElementById('tab-'+id).classList.add('on');el.classList.add('on');if(id==='log')renderLog();else if(id==='overview')renderOV();else if(id==='io'){refreshIO();renderProjList();}else renderL();}
+function showTab(id,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));document.getElementById('tab-'+id).classList.add('on');el.classList.add('on');if(id==='log')renderLog();else if(id==='overview')renderOV();else if(id==='io'){refreshIO();renderProjList();document.getElementById('dq-results').innerHTML='';}else renderL();}
 
 
 // ── vessel icons for lineage nodes ──
@@ -586,9 +592,9 @@ function nodeVesselIcons(n, color) {
 }
 
 // ── lineage ──
-function bTree(nodes){const map={};nodes.forEach(n=>map[n.id]={...n,children:[]});const roots=[];nodes.forEach(n=>{if(n.parent&&map[n.parent])map[n.parent].children.push(map[n.id]);else if(!n.parent)roots.push(map[n.id]);});return roots;}
+function bTree(nodes){const map={};nodes.forEach(n=>map[n.id]={...n,children:[]});const roots=[];nodes.forEach(n=>{if(n.parent&&map[n.parent])map[n.parent].children.push(map[n.id]);else roots.push(map[n.id]);});return roots;}
 const NW=126,NH=66,DPX=20,VG=82,HG=16;
-function lay(roots){const out=[];let gy=28;roots.forEach(root=>{const br=[];function wk(n,x,y){n._x=x+(n.days||0)*DPX+(n.days>0?HG:0);n._y=y;br.push(n);n.children.forEach((c,i)=>wk(c,n._x+NW+HG,y+i*VG));}wk(root,20,gy);out.push(...br);gy=Math.max(...br.map(b=>b._y))+VG+20;});return out;}
+function lay(roots){const out=[];let gy=28;roots.forEach(root=>{const br=[];const visited=new Set();function wk(n,x,y,depth){if(depth>200||visited.has(n.id))return;visited.add(n.id);n._x=x+(n.days||0)*DPX+(n.days>0?HG:0);n._y=y;br.push(n);n.children.forEach((c,i)=>wk(c,n._x+NW+HG,y+i*VG,depth+1));}wk(root,20,gy,0);out.push(...br);if(br.length)gy=Math.max(...br.map(b=>b._y))+VG+20;});return out;}
 function mks(tag,a){const e=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(a).forEach(([k,v])=>e.setAttribute(k,v));return e;}
 function trn(s,n){return s&&s.length>n?s.slice(0,n-1)+'...':s;}
 
@@ -2177,7 +2183,8 @@ var MFIELDS = [
   {k:'days',l:'Days in culture',req:0,kw:['days','days in culture','duration','culture days']},
   {k:'condition',l:'Media / condition',req:0,kw:['media','medium','condition','media type','growth media']},
   {k:'substrate',l:'Substrate',req:0,kw:['substrate','coating','surface']},
-  {k:'wells',l:'Vessel(s)',req:0,kw:['vessel','flask','plate','wells','format','container']},
+  {k:'wells',l:'Vessel type',req:0,kw:['vessel','flask','plate','wells','format','container','tc vessel','vessel type','end vessel','end tc vessel']},
+  {k:'vesselQty',l:'Vessel quantity',req:0,kw:['qty','quantity','vessel qty','number of','count','vessel count','# vessels','num vessels']},
   {k:'splitRatio',l:'Split ratio',req:0,kw:['split','ratio','split ratio','dilution']},
   {k:'confluency',l:'Confluency %',req:0,kw:['confluency','confluence','%confluent','percent confluent']},
   {k:'seedingTotal',l:'Total cells seeded',req:0,kw:['total seeded','cells seeded','seeding total','seeded']},
@@ -2230,6 +2237,93 @@ function mergeXlsxData(incoming, incomingProjects, ir) {
   updLF(); renderL(); refreshIO(); renderProjList();
   if(ir){ ir.className='ires ok'; ir.textContent='Merged: ' + added + ' added, ' + updated + ' updated.'; }
   toast('Merged ' + (added+updated) + ' records from Excel');
+}
+
+
+function runDQ() {
+  const results = [];
+  const ids = new Set(passages.map(function(p){return p.id;}));
+
+  // 1. Broken parent references (exclude thaw/inherit — those legitimately have no parent)
+  const broken = passages.filter(function(p){return p.parent && !ids.has(p.parent) && p.action!=='thaw' && p.action!=='inherit';});
+  if(broken.length) {
+    results.push({
+      type: 'warn',
+      title: broken.length + ' broken parent reference' + (broken.length!==1?'s':''),
+      items: broken.map(function(p){
+        // find closest match by similarity
+        const best = findClosestId(p.parent, ids);
+        return p.id + ' → parent "' + p.parent + '"' + (best?' (closest: "'+best+'"?)':'');
+      })
+    });
+  }
+
+  // 2. Duplicate IDs
+  const seen = new Set(), dupes = new Set();
+  passages.forEach(function(p){ if(seen.has(p.id)) dupes.add(p.id); seen.add(p.id); });
+  if(dupes.size) {
+    results.push({type:'err', title: dupes.size + ' duplicate record ID' + (dupes.size!==1?'s':''), items:[...dupes]});
+  }
+
+  // 3. Missing required fields
+  const missingLine = passages.filter(function(p){return !p.line;});
+  if(missingLine.length) {
+    results.push({type:'warn', title: missingLine.length + ' records missing cell line', items: missingLine.map(function(p){return p.id;})});
+  }
+  const missingDate = passages.filter(function(p){return !p.date;});
+  if(missingDate.length) {
+    results.push({type:'warn', title: missingDate.length + ' records missing date', items: missingDate.map(function(p){return p.id;})});
+  }
+
+  // 4. Invalid action values
+  const validActions = ['thaw','inherit','passage','freeze','experiment'];
+  const badAction = passages.filter(function(p){return !validActions.includes(p.action);});
+  if(badAction.length) {
+    results.push({type:'err', title: badAction.length + ' records with unrecognized action', items: badAction.map(function(p){return p.id+' (action: "'+p.action+'"';})});
+  }
+
+  // 5. Summary
+  const el = document.getElementById('dq-results');
+  if(!results.length) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--green);padding:8px 0">✓ No issues found in ' + passages.length + ' records.</div>';
+    return;
+  }
+
+  let h = '';
+  results.forEach(function(r){
+    const col = r.type==='err' ? 'var(--red)' : '#854F0B';
+    const bg  = r.type==='err' ? 'var(--rl)'  : '#FAEEDA';
+    h += '<div style="background:'+bg+';border-radius:var(--r);padding:10px 12px;margin-bottom:8px">';
+    h += '<div style="font-size:12px;font-weight:500;color:'+col+';margin-bottom:6px">';
+    h += (r.type==='err'?'✘':'⚠') + ' ' + r.title + '</div>';
+    // show first 10 items
+    const show = r.items.slice(0,10);
+    h += '<div style="font-size:11px;font-family:monospace;color:var(--tx);line-height:1.8">';
+    h += show.join('<br>');
+    if(r.items.length > 10) h += '<br><span style="color:var(--tx2)">... and ' + (r.items.length-10) + ' more</span>';
+    h += '</div>';
+    h += '</div>';
+  });
+  el.innerHTML = h;
+}
+
+function findClosestId(target, ids) {
+  // find the ID with the most characters in common (simple similarity)
+  var best = null, bestScore = 0;
+  ids.forEach(function(id){
+    var score = 0;
+    var t = target.toLowerCase(), s = id.toLowerCase();
+    for(var i=0; i<Math.min(t.length,s.length); i++){
+      if(t[i]===s[i]) score++; else break;
+    }
+    // also check suffix match
+    var ts = t.split('').reverse().join(''), ss = s.split('').reverse().join('');
+    for(var i=0; i<Math.min(ts.length,ss.length); i++){
+      if(ts[i]===ss[i]) score++; else break;
+    }
+    if(score > bestScore && score > 3) { bestScore=score; best=id; }
+  });
+  return best;
 }
 
 </script>
