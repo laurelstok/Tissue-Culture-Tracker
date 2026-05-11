@@ -288,6 +288,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div id="dq-results" style="margin-top:10px"></div>
   </div>
   <div class="iosec">
+    <div class="iotitle">Lab members</div>
+    <div class="iodesc">Manage the operator dropdown shown on all record forms. Add name and email for future notification support.</div>
+    <div id="member-list" style="margin-bottom:10px"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:6px;align-items:center">
+      <input id="member-name-input" placeholder="Name" style="font-size:12px;padding:5px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit">
+      <input id="member-email-input" placeholder="Email (optional)" style="font-size:12px;padding:5px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit">
+      <button class="btn btn-ok" onclick="addMember()">Add</button>
+    </div>
+  </div>
+  <div class="iosec">
     <div class="iotitle">Projects</div>
     <div class="iodesc">Manage the project list available in the thaw and inherit forms.</div>
     <div id="proj-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
@@ -424,9 +434,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <script>
 // ── constants ──
-const AC={thaw:'#185FA5',inherit:'#534AB7',passage:'#0F6E56',freeze:'#854F0B',experiment:'#993C1D'};
-const AF={thaw:'#E6F1FB',inherit:'#EEEDFE',passage:'#E1F5EE',freeze:'#FAEEDA',experiment:'#FAECE7'};
-const AL={thaw:'Thaw',inherit:'Inherit',passage:'Passage',freeze:'Freeze',experiment:'Experiment'};
+const AC={thaw:'#185FA5',inherit:'#534AB7',passage:'#0F6E56',freeze:'#854F0B',experiment:'#993C1D',discontinued:'#B0B0B0'};
+const AF={thaw:'#E6F1FB',inherit:'#EEEDFE',passage:'#E1F5EE',freeze:'#FAEEDA',experiment:'#FAECE7',discontinued:'#F5F5F5'};
+const AL={thaw:'Thaw',inherit:'Inherit',passage:'Passage',freeze:'Freeze',experiment:'Experiment',discontinued:'Discontinued'};
 const AI={thaw:'T',inherit:'I',passage:'P',freeze:'F',experiment:'E'};
 const LC=['#534AB7','#0F6E56','#D85A30','#1D9E75','#854F0B','#185FA5','#993C1D'];
 const LF=['#EEEDFE','#E1F5EE','#FAECE7','#E1F5EE','#FAEEDA','#E6F1FB','#FAECE7'];
@@ -440,6 +450,7 @@ const FA={T25:25,T75:75,T150:150,T175:175,T225:225,T300:300,T500:500,HYPERFlask:
 // ── state ──
 let passages=[];
 let projects=[];
+let labMembers=[]; // [{name:'', email:''}]
 let MS={mode:null,parentId:null,editId:null,action:null,_tempId:null,_stub:null};
 let VL=[];
 let LM={};
@@ -508,9 +519,9 @@ function seedingInputVal(id, previewId, placeholder, val, extraOnInput) {
 
 // ── helpers ──
 function lc(l,f){if(!LM[l]){const i=Object.keys(LM).length;LM[l]={c:LC[i%LC.length],f:LF[i%LF.length]};}return f?LM[l].f:LM[l].c;}
-function pL(n){if(n.action==='thaw')return'Thaw P'+n.passageNum;if(n.action==='inherit')return'Inherit P'+n.passageNum;if(n.action==='freeze')return'P'+n.passageNum+' Frz';if(n.action==='experiment')return'P'+n.passageNum+' Exp';return'P'+n.passageNum;}
+function pL(n){if(n.action==='thaw')return'Thaw P'+n.passageNum;if(n.action==='inherit')return'Inherit P'+n.passageNum;if(n.action==='freeze')return'P'+n.passageNum+' ❄';if(n.action==='experiment')return'P'+n.passageNum+' Exp';return'P'+n.passageNum;}
 function vLbl(n){if(n.vessels&&n.vessels.length)return n.vessels.map(v=>'('+v.qty+') '+v.type).join(', ');return n.wells||'';}
-function gId(line,action){const p=(line||'UNK').replace(/[^A-Z0-9]/gi,'').slice(0,3).toUpperCase();const a={thaw:'TH',inherit:'IH',passage:'P',freeze:'FZ',experiment:'EX'}[action]||'XX';return p+'-'+a+'-'+Date.now().toString(36).slice(-4).toUpperCase();}
+function gId(line,action){const p=(line||'UNK').replace(/[^A-Z0-9]/gi,'').slice(0,3).toUpperCase();const a={thaw:'TH',inherit:'IH',passage:'P',freeze:'FZ',experiment:'EX',discontinued:'DC',disc:'DC'}[action]||'XX';return p+'-'+a+'-'+Date.now().toString(36).slice(-4).toUpperCase();}
 function cP(pid,action){if(action==='thaw'||action==='inherit')return null;const par=passages.find(p=>p.id===pid);if(!par)return 1;return action==='passage'?(par.passageNum||0)+1:(par.passageNum||0);}
 function nP(pid){const par=passages.find(p=>p.id===pid);return par?(par.passageNum||0)+1:1;}
 function dBet(a,b){if(!a||!b)return null;const d=Math.round((new Date(b)-new Date(a))/864e5);return d>=0?d:null;}
@@ -527,17 +538,17 @@ function updLF(){
 }
 
 // ── import / export ──
-function bld(){return{schemaVersion:'1.2',exportedAt:new Date().toISOString(),recordCount:passages.length,projects,passages};}
+function bld(){return{schemaVersion:'1.3',exportedAt:new Date().toISOString(),recordCount:passages.length,projects,labMembers,passages};}
 function doExport(){const json=JSON.stringify(bld(),null,2);const fn='tc-records-'+tod()+'.json';const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([json],{type:'application/json'}));a.download=fn;a.click();toast('Downloaded '+fn);}
 function copyJ(){const json=JSON.stringify(bld(),null,2);navigator.clipboard.writeText(json).then(()=>toast('Copied')).catch(()=>{const t=document.createElement('textarea');t.value=json;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();toast('Copied');});}
 function handleFile(e){const f=e.target.files[0];if(f)loadF(f);}
 function loadF(file){const r=new FileReader();r.onload=ev=>{try{impD(JSON.parse(ev.target.result),file.name);}catch(e){showIR(false,'Invalid JSON: '+e.message);}};r.readAsText(file);}
-function impD(data,fn){const imp=Array.isArray(data)?data:(data.passages&&Array.isArray(data.passages)?data.passages:null);if(!imp){showIR(false,'Could not find passages array.');return;}if(!imp.length){showIR(false,'File is empty.');return;}const miss=['id','action','line','passageNum'].filter(k=>!(k in imp[0]));if(miss.length){showIR(false,'Missing fields: '+miss.join(', '));return;}passages=imp;if(data.projects&&Array.isArray(data.projects))projects=data.projects;else projects=[];LM={};updLF();renderL();renderProjectDropdown();refreshIO();showIR(true,'Loaded '+imp.length+' record'+(imp.length!==1?'s':'')+' from '+fn+(data.exportedAt?' (exported '+data.exportedAt.slice(0,10)+')':'')+'.');toast('Imported '+imp.length+' records');}
+function impD(data,fn){const imp=Array.isArray(data)?data:(data.passages&&Array.isArray(data.passages)?data.passages:null);if(!imp){showIR(false,'Could not find passages array.');return;}if(!imp.length){showIR(false,'File is empty.');return;}const miss=['id','action','line','passageNum'].filter(k=>!(k in imp[0]));if(miss.length){showIR(false,'Missing fields: '+miss.join(', '));return;}passages=imp;if(data.projects&&Array.isArray(data.projects))projects=data.projects;else projects=[];if(data.labMembers&&Array.isArray(data.labMembers))labMembers=data.labMembers;else labMembers=[];LM={};updLF();renderL();renderProjectDropdown();renderMemberList();refreshIO();showIR(true,'Loaded '+imp.length+' record'+(imp.length!==1?'s':'')+' from '+fn+(data.exportedAt?' (exported '+data.exportedAt.slice(0,10)+')':'')+'.');toast('Imported '+imp.length+' records');}
 function showIR(ok,msg){const e=document.getElementById('ir');if(!e)return;e.className='ires '+(ok?'ok':'err');e.textContent=(ok?'✓ ':'')+msg;e.style.display='block';}
 function refreshIO(){const json=JSON.stringify(bld(),null,2);const fn=document.getElementById('efn');if(fn)fn.textContent='tc-records-'+tod()+'.json';const pv=document.getElementById('jpv');if(pv)pv.textContent=json.slice(0,600)+(json.length>600?'\n\n... ('+passages.length+' records total)':'');}
 
 // ── tabs ──
-function showTab(id,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));document.getElementById('tab-'+id).classList.add('on');el.classList.add('on');if(id==='log')renderLog();else if(id==='overview')renderOV();else if(id==='io'){refreshIO();renderProjList();document.getElementById('dq-results').innerHTML='';}else renderL();}
+function showTab(id,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));document.getElementById('tab-'+id).classList.add('on');el.classList.add('on');if(id==='log')renderLog();else if(id==='overview')renderOV();else if(id==='io'){refreshIO();renderProjList();renderMemberList();document.getElementById('dq-results').innerHTML='';}else renderL();}
 
 
 // ── vessel icons for lineage nodes ──
@@ -609,7 +620,9 @@ function renderL(){
   [...new Set(nodes.map(n=>n.line))].forEach(line=>{const ln=nodes.filter(n=>n.line===line),mnY=Math.min(...ln.map(n=>n._y))-12,mxYl=Math.max(...ln.map(n=>n._y+NH))+10;svg.appendChild(mks('rect',{x:6,y:mnY,width:mxX-12,height:mxYl-mnY,rx:10,fill:lc(line,true),opacity:0.45,stroke:lc(line,false),'stroke-width':0.5}));const lt=mks('text',{x:14,y:mnY+13,fill:lc(line,false),'font-size':10,'font-weight':500,'font-family':'system-ui'});lt.textContent=line;svg.appendChild(lt);});
   const nm={};nodes.forEach(n=>nm[n.id]=n);
   nodes.forEach(n=>{
-    if(n.parent&&nm[n.parent]){const p=nm[n.parent],x1=p._x+NW,y1=p._y+NH/2,x2=n._x,y2=n._y+NH/2,mx=(x1+x2)/2;svg.appendChild(mks('path',{d:'M'+x1+','+y1+' L'+mx+','+y1+' L'+mx+','+y2+' L'+x2+','+y2,fill:'none',stroke:AC[n.action],'stroke-width':1.5,opacity:0.5,'stroke-dasharray':n.action==='freeze'?'4,3':'none'}));if(n.days>0){const dl=mks('text',{x:mx,y:Math.min(y1,y2)-4,'text-anchor':'middle','font-size':9,fill:'#999','font-family':'system-ui'});dl.textContent=n.days+'d';svg.appendChild(dl);}}
+    if(n.parent&&nm[n.parent]){const p=nm[n.parent],x1=p._x+NW,y1=p._y+NH/2,x2=n._x,y2=n._y+NH/2,mx=(x1+x2)/2;svg.appendChild(mks('path',{d:'M'+x1+','+y1+' L'+mx+','+y1+' L'+mx+','+y2+' L'+x2+','+y2,fill:'none',stroke:n.action==='discontinued'?'#E53935':AC[n.action],'stroke-width':1.5,opacity:n.action==='discontinued'?0.8:0.5,'stroke-dasharray':n.action==='discontinued'?'5,4':(n.action==='freeze'?'4,3':'none')}));if(n.days>0){const dl=mks('text',{x:mx,y:Math.min(y1,y2)-4,'text-anchor':'middle','font-size':9,fill:'#999','font-family':'system-ui'});dl.textContent=n.days+'d';svg.appendChild(dl);}}
+    // broken parent: draw red dashed line trailing off to the left
+    if(n.parent&&!nm[n.parent]&&n.action!=='thaw'&&n.action!=='inherit'){const x1=n._x,y1=n._y+NH/2,x0=Math.max(0,x1-60);svg.appendChild(mks('path',{d:'M'+x1+','+y1+' L'+x0+','+y1,fill:'none',stroke:'#E53935','stroke-width':1.5,'stroke-dasharray':'4,3',opacity:0.8}));const xEnd=mks('text',{x:x0-2,y:y1+1,'text-anchor':'end','dominant-baseline':'central','font-size':12,fill:'#E53935','font-family':'system-ui'});xEnd.textContent='✗';svg.appendChild(xEnd);}
     const vl=vLbl(n);
     const g=mks('g',{transform:'translate('+n._x+','+n._y+')',cursor:'pointer'});
     g.appendChild(mks('rect',{x:0,y:0,width:NW,height:NH,rx:6,fill:AF[n.action],stroke:AC[n.action],'stroke-width':0.75}));
@@ -618,6 +631,10 @@ function renderL(){
     [{x:6,y:17,sz:11,fw:500,fill:AC[n.action],txt:pL(n)},{x:6,y:29,sz:9,fill:'#777',txt:trn(n.id,18)},{x:6,y:55,sz:9,fill:'#aaa',txt:n.date}].forEach(o=>{const t=mks('text',{x:o.x,y:o.y,'font-size':o.sz,fill:o.fill,'font-family':'system-ui'});if(o.fw)t.setAttribute('font-weight',o.fw);t.textContent=o.txt;g.appendChild(t);});
     // vessel label (shortened to leave room)
     const vlt=mks('text',{x:6,y:41,'font-size':9,fill:'#888','font-family':'system-ui'});vlt.textContent=trn(vl,14);g.appendChild(vlt);
+    // discontinued badge
+    if(n.action==='discontinued'){const wb=mks('rect',{x:NW-28,y:3,width:22,height:12,rx:3,fill:'#E53935'});g.appendChild(wb);const wt=mks('text',{x:NW-17,y:9,'text-anchor':'middle','dominant-baseline':'central','font-size':9,'font-weight':600,fill:'#fff','font-family':'system-ui'});wt.textContent='✗';g.appendChild(wt);}
+    // broken parent warning badge
+    if(n.parent&&!nm[n.parent]&&n.action!=='thaw'&&n.action!=='inherit'&&n.action!=='discontinued'){const wb=mks('rect',{x:NW-28,y:3,width:22,height:12,rx:3,fill:'#E53935'});g.appendChild(wb);const wt=mks('text',{x:NW-17,y:9,'text-anchor':'middle','dominant-baseline':'central','font-size':8,'font-weight':600,fill:'#fff','font-family':'system-ui'});wt.textContent='⚠ ?';g.appendChild(wt);}
     if(n.feeds&&n.feeds.length){
       const fb=mks('text',{x:6,y:NH-8,'font-size':8,fill:'#1D9E75','font-family':'system-ui'});
       fb.textContent=n.feeds.length+' feed'+(n.feeds.length!==1?'s':'');
@@ -662,15 +679,17 @@ function showBM(pid){
   const _pid=pid;
   const bmItems=[
     {a:'passage',l:'Passage',m:'P'+np,col:AC['passage']},
-    {a:'freeze',l:'Freeze vials',m:'stays P'+par.passageNum,col:AC['freeze']},
-    {a:'experiment',l:'Start experiment',m:'stays P'+par.passageNum,col:AC['experiment']},
+    {a:'freeze',l:'Freeze vials',m:'P'+(par.passageNum+1),col:AC['freeze']},
+    {a:'experiment',l:'Start experiment',m:'P'+par.passageNum+' (or P'+(par.passageNum+1)+')',col:AC['experiment']},
     {a:'feed',l:'Log feed',m:'no new node — logs on this record',col:'#1D9E75'},
+    {a:'discontinued',l:'Discontinued / failed',m:'marks culture as ended',col:'#B0B0B0'},
   ];
   window._bmFns=[
     function(){closeM();openF(_pid,'passage');},
     function(){closeM();openF(_pid,'freeze');},
     function(){closeM();openF(_pid,'experiment');},
     function(){closeM();openFeedForm(_pid);},
+    function(){closeM();openDiscontinuedForm(_pid);},
   ];
   document.getElementById('mbd').innerHTML='<div style="background:#fff;border:0.5px solid #E3E1DB;border-radius:10px;padding:8px;min-width:220px">'
     +bmItems.map(function(x,xi){
@@ -1083,7 +1102,7 @@ function openFeedForm(recId){
     +'<div class="msub">'+rec.id+' · '+pL(rec)+' · '+rec.line+'</div></div>';
   document.getElementById('mbd').innerHTML='<div class="fg">'
     +'<div class="fr"><label>Date</label><input id="ff-date" type="date" value="'+tod()+'"></div>'
-    +'<div class="fr"><label>Operator</label><input id="ff-user" placeholder="Name"></div>'
+    +'<div class="fr"><label>Operator</label>'+operatorSelectHTML('')+'</div>'
     +'<div class="fr"><label>Media type</label><input id="ff-media" placeholder="e.g. DMEM 10% FBS" value="'+(rec.condition||'')+'"></div>'
     +'<div class="fr"><label>Volume added (mL)</label><input id="ff-vol" type="number" min="0" step="0.5" placeholder="e.g. 10"></div>'
     +'</div>'
@@ -1098,6 +1117,7 @@ function openFeedForm(recId){
   document.getElementById('mft').innerHTML='<button class="btn" onclick="closeM()">Cancel</button>'
     +'<button class="btn btn-p" data-recid="'+recId+'" onclick="subFeed(this.dataset.recid)">Save feed event</button>';
   document.getElementById('mbg').classList.add('on');
+  setTimeout(renderOperatorDropdown,0);
 }
 
 function subFeed(recId){
@@ -1106,7 +1126,7 @@ function subFeed(recId){
   if(!rec.feeds)rec.feeds=[];
   const media=fv('ff-media'),vol=fv('ff-vol');
   if(!media&&!vol){toast('Please enter at least a media type or volume');return;}
-  rec.feeds.push({date:fv('ff-date')||tod(),media:media,volumeMl:vol,user:fv('ff-user'),note:fv('ff-note'),mediaCat:fv('ff-cat'),mediaLot:fv('ff-lot'),mediaExp:fv('ff-exp'),addedAt:new Date().toISOString()});
+  rec.feeds.push({date:fv('ff-date')||tod(),media:media,volumeMl:vol,user:getOperatorValue(),note:fv('ff-note'),mediaCat:fv('ff-cat'),mediaLot:fv('ff-lot'),mediaExp:fv('ff-exp'),addedAt:new Date().toISOString()});
   closeM();renderL();
   toast('Feed event logged on '+recId);
 }
@@ -1296,7 +1316,7 @@ function openF(pid,action){
       +'<div class="fr"><label>Vessel</label>'+vesselDropdown(d.wells||'')+'</div>'
       +'<div class="fr"><label>Medium / condition</label><input id="fc" value="'+esc(d.condition||'')+'" placeholder="e.g. DMEM 10% FBS"></div>'
       +'<div class="fr"><label>Substrate</label><input id="fsub" value="'+esc(d.substrate||'TC treated')+'"></div>'
-      +'<div class="fr"><label>Operator</label><input id="fu" value="'+esc(d.user||'')+'"></div>'
+      +'<div class="fr"><label>Operator</label>'+operatorSelectHTML(d.user||'')+'</div>'
       +'<div class="fr"><label>Project</label>'+projectSelectHTML(d.project||'')+'</div></div>'
       +'<div id="plate-btn-row" style="margin-bottom:8px">'+(thawVesselIsPlate?'<button class="plate-btn" onclick="openPMThaw(\''+d.id+'\',\''+d.wells+'\')">View / edit plate wells</button>':'')+'</div>'
       +'<div class="seed-warn" id="seed-warn-thaw"></div>'
@@ -1325,7 +1345,7 @@ function openF(pid,action){
       +'<div class="fr"><label>Vessel</label>'+vesselDropdown(d.wells||'')+'</div>'
       +'<div class="fr"><label>Medium / condition</label><input id="fc" value="'+esc(d.condition||'')+'" placeholder="e.g. mTeSR1"></div>'
       +'<div class="fr"><label>Substrate</label><input id="fsub" value="'+esc(d.substrate||'Matrigel')+'"></div>'
-      +'<div class="fr"><label>Received by</label><input id="fu" value="'+esc(d.user||'')+'"></div>'
+      +'<div class="fr"><label>Received by</label>'+operatorSelectHTML(d.user||'')+'></div>'
       +'<div class="fr"><label>Project</label>'+projectSelectHTML(d.project||'')+'</div></div>'
       +'<div id="plate-btn-row" style="margin-bottom:8px">'+(thawVesselIsPlate?'<button class="plate-btn" onclick="openPMThaw(\''+d.id+'\',\''+d.wells+'\')">View / edit plate wells</button>':'')+'</div>'
       +'<div class="seed-warn" id="seed-warn-thaw"></div>'
@@ -1348,7 +1368,7 @@ function openF(pid,action){
       +'<div class="fr"><label>Split ratio <span class="ot">optional</span></label><input id="fsp" value="'+esc(d.splitRatio||'')+'" placeholder="e.g. 1:3"></div>'
       +'<div class="fr"><label>Confluency at split % <span class="ot">optional</span></label><input id="fco" type="number" value="'+esc(d.confluency||'')+'" placeholder="e.g. 80"></div>'
       +'<div class="fr"><label>Substrate</label><input id="fsub" value="'+esc(d.substrate||'TC treated')+'"></div>'
-      +'<div class="fr"><label>Operator</label><input id="fu" value="'+esc(d.user||'')+'"></div></div>'
+      +'<div class="fr"><label>Operator</label>'+operatorSelectHTML(d.user||'')+'</div></div>'
       +'<div class="fsec" style="margin-bottom:8px">Cell count</div>'
       +cellCountSection('pass', d)
       +'<div class="fsec">Destination vessels</div>'
@@ -1369,7 +1389,7 @@ function openF(pid,action){
       +'<div class="fr"><label>Cryoprotectant</label><input id="fcr" value="'+esc(d.cryo||'10% DMSO in FBS')+'"></div>'
       +'<div class="fr"><label>Storage location</label><input id="fst" value="'+esc(d.storage||'')+'" placeholder="e.g. LN2 tank A box 2"></div>'
       +'<div class="fr"><label>Viability %</label><input id="fvb" type="number" value="'+esc(d.viability||'')+'" placeholder="e.g. 90"></div>'
-      +'<div class="fr"><label>Operator</label><input id="fu" value="'+esc(d.user||'')+'"></div></div>'
+      +'<div class="fr"><label>Operator</label>'+operatorSelectHTML(d.user||'')+'</div></div>'
       +'<div class="fsec" style="margin-bottom:8px">Cell count</div>'
       +cellCountSection('frz', d)
       +'<div class="fr"><label>Notes</label><textarea id="fn" placeholder="Reason for freeze, any notes...">'+esc(d.note||'')+'</textarea></div>';
@@ -1387,7 +1407,8 @@ function openF(pid,action){
       +'<div id="plate-btn-row" style="margin-top:6px;margin-bottom:8px">'+(expVesselIsPlate?'<button class="plate-btn" onclick="openPMExp(\''+d.wells+'\')">View plate wells</button>':'')+'</div>'
       +'<div class="fsec" style="margin-bottom:8px">Cell count</div>'
       +cellCountSection('exp', d)
-      +'<div class="fr"><label>Operator</label><input id="fu" value="'+esc(d.user||'')+'"></div>'
+      +'<div class="fr"><label>Operator</label>'+operatorSelectHTML(d.user||'')+'</div>'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><input type="checkbox" id="exp-inc-p" style="width:14px;height:14px;cursor:pointer" checked'+'>  <label for="exp-inc-p" style="font-size:12px;cursor:pointer">Increment passage number (P'+(par?par.passageNum:0)+' → P'+(par?par.passageNum+1:1)+')</label></div>'
       +'<div class="fr"><label>Hypothesis / goal</label><textarea id="fn" placeholder="What are you testing?">'+esc(d.note||'')+'</textarea></div>';
   }
 
@@ -1402,6 +1423,8 @@ function openF(pid,action){
   document.getElementById('mft').innerHTML='<button class="btn" onclick="closeM()">Cancel</button>'+(isE?'<button class="btn btn-d" onclick="delR(\''+en.id+'\')">Delete</button>':'')+'<button class="btn btn-p" onclick="subF()">'+(isE?'Save changes':'Save record')+'</button>';
   document.getElementById('mbg').classList.add('on');
   setTimeout(renderProjectDropdown,0);
+  setTimeout(renderOperatorDropdown,50);
+  setTimeout(function(){const os=document.getElementById('f-operator');if(os&&labMembers.length===0)os.style.display='none';},0);
   if(act==='passage'){setTimeout(function(){renderVL();if(!isE)addV();},0);}
   if(act==='thaw'||act==='inherit'){setTimeout(updTP,50);setTimeout(onVesselChange,80);}
   if(isE&&par&&d.date)setTimeout(onDC,60);
@@ -1426,17 +1449,17 @@ function subF(){
   if(ms.mode==='edit'){
     const n=passages.find(p=>p.id===ms.editId);if(!n){closeM();return;}
     const act=n.action;
-    n.date=fv('fdt')||n.date;n.days=fi('fd');n.user=fv('fu')||n.user;n.note=fv('fn')||n.note;
+    n.date=fv('fdt')||n.date;n.days=fi('fd');n.user=getOperatorValue()||n.user;n.note=fv('fn')||n.note;
     if(act==='thaw'||act==='inherit'){if(act==='thaw')Object.assign(n,getCCData('thaw'));n.wells=getThawWells();n.condition=fv('fc');n.substrate=fv('fsub');n.project=fv('f-project');n.seedingDensity=fv('thaw-seed-density');n.seedingTotal=fv('thaw-seed-total');n.seedingUnit=n.wells==='Spinner flask'?'cells/mL':'cells/cm\u00b2';}
     if(act==='passage'){Object.assign(n,getCCData('pass'));const fil=VL.filter(v=>v.type&&v.type!=='');if(fil.length){n.vessels=fil.map(v=>({type:v.type==='Custom...'?(v.custom||'Custom'):v.type,vesselClass:isPlate(v.type)?'plate':'flask',qty:v.qty,seeding:v.seeding||null,seedingTotal:v.seedingTotal||null,seedingUnit:v.type==='Spinner flask'?'cells/mL':'cells/cm\u00b2'}));n.wells=fil.map(v=>'('+v.qty+') '+(v.type==='Custom...'?(v.custom||'Custom'):v.type)).join(', ');}n.condition=fv('fc');n.substrate=fv('fsub');n.splitRatio=fv('fsp');n.confluency=fv('fco');}
     if(act==='freeze'){Object.assign(n,getCCData('frz'));n.vials=fv('fvi');n.cellsPerVial=fv('fcv');n.cryo=fv('fcr');n.storage=fv('fst');n.viability=fv('fvb');}
-    if(act==='experiment'){Object.assign(n,getCCData('exp'));n.expId=fv('fei');n.assay=fv('fas');n.treatment=fv('ftr');n.timepoints=fv('ftp2');n.wells=getThawWells();}
+    if(act==='experiment'){Object.assign(n,getCCData('exp'));const incPe=document.getElementById('exp-inc-p');if(incPe){const parRec=passages.find(function(p){return p.id===n.parent;});n.passageNum=(incPe.checked&&parRec)?(parRec.passageNum+1):(parRec?parRec.passageNum:n.passageNum);}n.expId=fv('fei');n.assay=fv('fas');n.treatment=fv('ftr');n.timepoints=fv('ftp2');n.wells=getThawWells();}
     closeM();renderL();toast('Record updated');return;
   }
   const line=fv('fl')||(par?par.line:'UNK');
   const nid=ms._tempId||gId(line,ms.action);
   const pn=(ms.action==='thaw'||ms.action==='inherit')?parseInt(fv('fp'))||0:cP(ms.parentId,ms.action)||0;
-  const rec={id:nid,parent:ms.parentId||null,line,action:ms.action,passageNum:pn,date:fv('fdt')||tod(),days:fi('fd'),condition:fv('fc')||(par?par.condition:''),note:fv('fn'),user:fv('fu'),substrate:fv('fsub')};
+  const rec={id:nid,parent:ms.parentId||null,line,action:ms.action,passageNum:pn,date:fv('fdt')||tod(),days:fi('fd'),condition:fv('fc')||(par?par.condition:''),note:fv('fn'),user:getOperatorValue(),substrate:fv('fsub')};
   if(ms.action==='thaw'){
     Object.assign(rec,getCCData('thaw'));rec.project=fv('f-project');rec.vial=fv('flt');rec.wells=getThawWells();
     rec.seedingDensity=fv('thaw-seed-density');
@@ -1473,9 +1496,12 @@ function subF(){
   if(ms.action==='passage'){Object.assign(rec,getCCData('pass'));const fil=VL.filter(v=>v.type&&v.type!=='');if(!fil.length){alert('Please add at least one destination vessel.');return;}rec.vessels=fil.map(v=>({type:v.type==='Custom...'?(v.custom||'Custom'):v.type,vesselClass:isPlate(v.type)?'plate':'flask',qty:v.qty,seeding:v.seeding||null,seedingTotal:v.seedingTotal||null,seedingUnit:v.type==='Spinner flask'?'cells/mL':'cells/cm\u00b2'}));rec.wells=fil.map(v=>'('+v.qty+') '+(v.type==='Custom...'?(v.custom||'Custom'):v.type)).join(', ');rec.splitRatio=fv('fsp');rec.confluency=fv('fco');}
     if(MS._stub&&MS._stub.plateData&&Object.keys(MS._stub.plateData).length){rec.plateData=MS._stub.plateData;}
     else if(PM.vesselKey&&PM.allIds.length){const dp={};PM.allIds.forEach(function(id){if(PM.wells[id]&&(PM.wells[id].occupied||PM.wells[id].contaminated))dp[id]=PM.wells[id];});if(Object.keys(dp).length){rec.plateData={};rec.plateData[PM.vesselKey]=dp;}}
-  if(ms.action==='freeze'){Object.assign(rec,getCCData('frz'));rec.vials=fv('fvi');rec.cellsPerVial=fv('fcv');rec.cryo=fv('fcr');rec.storage=fv('fst');rec.viability=fv('fvb');}
+  if(ms.action==='freeze'){Object.assign(rec,getCCData('frz'));rec.passageNum=(par?par.passageNum+1:rec.passageNum);rec.vials=fv('fvi');rec.cellsPerVial=fv('fcv');rec.cryo=fv('fcr');rec.storage=fv('fst');rec.viability=fv('fvb');}
   if(ms.action==='experiment'){
-    Object.assign(rec,getCCData('exp'));rec.expId=fv('fei');rec.assay=fv('fas');rec.treatment=fv('ftr');rec.timepoints=fv('ftp2');
+    Object.assign(rec,getCCData('exp'));
+    const incP=document.getElementById('exp-inc-p');
+    rec.passageNum=(incP&&incP.checked&&par)?(par.passageNum+1):rec.passageNum;
+    rec.expId=fv('fei');rec.assay=fv('fas');rec.treatment=fv('ftr');rec.timepoints=fv('ftp2');
     rec.wells=getThawWells();
     // attach plate data if a plate was set up
     if(PM.vesselKey&&PM.allIds.length){
@@ -1846,7 +1872,7 @@ function renderFeedSection(recId) {
   h += '<div style="font-size:11px;font-weight:500;margin-bottom:8px">Record feed event</div>';
   h += '<div class="fg">';
   h += '<div><label style="font-size:10px;color:var(--tx2)">Date</label><input id="feed-date-'+recId+'" type="date" value="'+tod()+'"></div>';
-  h += '<div><label style="font-size:10px;color:var(--tx2)">Operator</label><input id="feed-user-'+recId+'" placeholder="Name"></div>';
+  h += '<div><label style="font-size:10px;color:var(--tx2)">Operator</label>'+operatorSelectHTML('')+'</div>';
   h += '<div><label style="font-size:10px;color:var(--tx2)">Media type</label><input id="feed-media-'+recId+'" placeholder="e.g. DMEM 10% FBS"></div>';
   h += '<div><label style="font-size:10px;color:var(--tx2)">Volume added (mL)</label><input id="feed-vol-'+recId+'" type="number" min="0" step="0.5" placeholder="e.g. 10"></div>';
   h += '</div>';
@@ -1865,6 +1891,8 @@ function renderFeedSection(recId) {
   h += '</div>';
   return h;
 }
+
+function onFeedSectionRendered(){setTimeout(renderOperatorDropdown,0);}
 
 function toggleFeedOpt(el) {
   const recId = el.dataset ? el.dataset.recid : el;
@@ -2276,7 +2304,7 @@ function runDQ() {
   }
 
   // 4. Invalid action values
-  const validActions = ['thaw','inherit','passage','freeze','experiment'];
+  const validActions = ['thaw','inherit','passage','freeze','experiment','discontinued'];
   const badAction = passages.filter(function(p){return !validActions.includes(p.action);});
   if(badAction.length) {
     results.push({type:'err', title: badAction.length + ' records with unrecognized action', items: badAction.map(function(p){return p.id+' (action: "'+p.action+'"';})});
@@ -2324,6 +2352,143 @@ function findClosestId(target, ids) {
     if(score > bestScore && score > 3) { bestScore=score; best=id; }
   });
   return best;
+}
+
+
+function openDiscontinuedForm(recId) {
+  const rec = passages.find(function(p){return p.id===recId;});
+  if(!rec) return;
+  // create a new discontinued child record
+  const id = gId(rec.line,'disc');
+  document.getElementById('mhd').innerHTML = '<div class="aic" style="background:#B0B0B0">D</div>'
+    + '<div><div class="mttl">Discontinued / failed</div>'
+    + '<div class="msub">'+rec.id+' · '+pL(rec)+' · '+rec.line+'</div></div>';
+  document.getElementById('mbd').innerHTML = '<div class="fg">'
+    + '<div class="fr"><label>Date</label><input id="df-date" type="date" value="'+tod()+'"></div>'
+    + '<div class="fr"><label>Operator</label>'+operatorSelectHTML('')+'</div>'
+    + '</div>'
+    + '<div class="fr"><label>Reason</label>'
+    + '<select id="df-reason" style="font-size:13px;padding:7px 9px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%">'
+    + '<option>Contamination</option>'
+    + '<option>Poor viability</option>'
+    + '<option>Mycoplasma</option>'
+    + '<option>Experimental endpoint</option>'
+    + '<option>Equipment failure</option>'
+    + '<option>Other</option>'
+    + '</select></div>'
+    + '<div class="fr"><label>Notes</label><textarea id="df-note" placeholder="What happened..."></textarea></div>';
+  document.getElementById('mft').innerHTML = '<button class="btn" onclick="closeM()">Cancel</button>'
+    + '<button class="btn" style="background:#1A1915;color:#fff;border-color:#1A1915" data-recid="'+recId+'" onclick="subDiscontinued(this.dataset.recid)">Mark discontinued</button>';
+  document.getElementById('mbg').classList.add('on');
+  setTimeout(renderOperatorDropdown,0);
+}
+
+function subDiscontinued(parentId) {
+  const par = passages.find(function(p){return p.id===parentId;});
+  if(!par) return;
+  const id = gId(par.line||'UNK','disc');
+  const rec = {
+    id: id,
+    parent: parentId,
+    line: par.line,
+    project: getLineageProject(par),
+    action: 'discontinued',
+    passageNum: par.passageNum || 0,
+    date: fv('df-date') || tod(),
+    days: 0,
+    condition: fv('df-reason'),
+    note: fv('df-note'),
+    user: getOperatorValue(),
+    feeds: [], images: [], plateData: {},
+  };
+  passages.push(rec);
+  closeM();
+  renderL();
+  toast('Marked as discontinued');
+}
+
+
+function operatorSelectHTML(selectedVal) {
+  const opts = '<option value="">-- Select operator --</option>'
+    + labMembers.map(function(m){
+        const v = m.name + (m.email ? ' <'+m.email+'>' : '');
+        const disp = m.name + (m.email ? ' ('+m.email+')' : '');
+        return '<option value="'+m.name+'"'+(selectedVal===m.name?' selected':'')+'>'+disp+'</option>';
+      }).join('')
+    + '<option value="__other__">Other (type below)</option>';
+  return '<select id="f-operator" class="operator-select" onchange="handleOperatorSelect(this)" style="font-size:13px;padding:7px 9px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%">'
+    + opts + '</select>'
+    + '<input id="f-operator-other" placeholder="Name or email..." style="display:none;margin-top:6px;font-size:13px;padding:7px 9px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%"'
+    + (labMembers.some(function(m){return m.name===selectedVal;})?'':' value="'+selectedVal+'"') + '>';
+}
+
+function handleOperatorSelect(sel) {
+  const other = document.getElementById('f-operator-other');
+  if(!other) return;
+  if(sel.value === '__other__') {
+    other.style.display = 'block';
+    other.focus();
+  } else {
+    other.style.display = 'none';
+  }
+}
+
+function getOperatorValue() {
+  const sel = document.getElementById('f-operator');
+  if(!sel) return fv('fu') || '';
+  if(sel.value === '__other__' || sel.value === '') {
+    const other = document.getElementById('f-operator-other');
+    return other ? other.value.trim() : '';
+  }
+  return sel.value;
+}
+
+function renderMemberList() {
+  const el = document.getElementById('member-list');
+  if(!el) return;
+  if(!labMembers.length) {
+    el.innerHTML = '<span style="font-size:12px;color:var(--tx2)">No lab members yet.</span>';
+    return;
+  }
+  el.innerHTML = labMembers.map(function(m, i){
+    return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px">'
+      + '<span style="font-weight:500">'+m.name+'</span>'
+      + (m.email ? '<span style="color:var(--tx2)">'+m.email+'</span>' : '')
+      + '<button onclick="delMember('+i+')" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--tx2);font-size:14px;padding:0">&times;</button>'
+      + '</div>';
+  }).join('');
+}
+
+function addMember() {
+  const nameEl = document.getElementById('member-name-input');
+  const emailEl = document.getElementById('member-email-input');
+  if(!nameEl || !nameEl.value.trim()) { toast('Please enter a name'); return; }
+  const name = nameEl.value.trim();
+  const email = emailEl ? emailEl.value.trim() : '';
+  if(labMembers.some(function(m){return m.name===name;})) { toast('Already in list'); return; }
+  labMembers.push({name:name, email:email});
+  nameEl.value = '';
+  if(emailEl) emailEl.value = '';
+  renderMemberList();
+  refreshIO();
+}
+
+function delMember(idx) {
+  labMembers.splice(idx, 1);
+  renderMemberList();
+  refreshIO();
+}
+
+
+function renderOperatorDropdown() {
+  document.querySelectorAll('.operator-select').forEach(function(sel) {
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">-- Select operator --</option>'
+      + labMembers.map(function(m){
+          return '<option value="'+m.name+'"'+(cur===m.name?' selected':'')+'>'+m.name+(m.email?' ('+m.email+')':'')+'</option>';
+        }).join('')
+      + '<option value="__other__"'+(cur==='__other__'?' selected':'')+'>Other (type below)</option>';
+  });
 }
 
 </script>
