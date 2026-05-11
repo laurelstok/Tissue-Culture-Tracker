@@ -268,6 +268,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <button class="btn btn-ok" onclick="doExport()">&#8595; Download JSON</button>
       <button class="btn" onclick="copyJ()">Copy to clipboard</button>
       <button class="btn" onclick="doExcelExport()" style="border-color:#1D7A3A;color:#1D7A3A;background:#EAF5EE">&#8595; Download Excel</button>
+      <button class="btn" onclick="loadDemoData()" style="border-color:#534AB7;color:#534AB7;background:#EEEDFE">&#9654; Load demo data</button>
     </div>
     <div class="jpv" id="jpv"></div>
   </div>
@@ -2489,6 +2490,199 @@ function renderOperatorDropdown() {
         }).join('')
       + '<option value="__other__"'+(cur==='__other__'?' selected':'')+'>Other (type below)</option>';
   });
+}
+
+
+function loadDemoData() {
+  if(passages.length > 0) {
+    if(!confirm('This will replace your current data with demo data. Continue?')) return;
+  }
+  const today = new Date();
+  function daysAgo(n) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - n);
+    return d.toISOString().slice(0,10);
+  }
+
+  projects = ['LS001 - iPSC Expansion', 'LS002 - HEK Transfection'];
+  labMembers = [
+    {name:'L. Stokely', email:'lstokely@lab.org'},
+    {name:'J. Chen', email:'jchen@lab.org'},
+    {name:'A. Patel', email:'apatel@lab.org'},
+  ];
+
+  passages = [
+    // ── iPSC lineage ────────────────────────────────────────────────────────
+    {
+      id:'iPSC-TH-A001', parent:null, line:'iPSC', project:'LS001 - iPSC Expansion',
+      action:'thaw', passageNum:8, date:daysAgo(42), days:0,
+      condition:'mTeSR1', substrate:'Matrigel', user:'L. Stokely',
+      wells:'(1) 6-well plate', vessels:[{type:'6-well plate',vesselClass:'plate',qty:1,seeding:null,seedingTotal:'3.5×10⁵',seedingUnit:'cells/cm²'}],
+      vial:'LS001 iPSC P8 CS10 5e6/vial DOM 10/01/24',
+      seedingTotal:'3.5×10⁵', viableCellsPerMl:'2×10⁶', viabilityPct:'92', volumeMl:'2',
+      totalViableCells:'4×10⁶', note:'Good recovery, colonies forming by D3',
+      feeds:[
+        {date:daysAgo(40),media:'mTeSR1',volumeMl:'2',user:'L. Stokely',note:'Full feed D2',mediaCat:'',mediaLot:'',mediaExp:'',addedAt:daysAgo(40)},
+        {date:daysAgo(39),media:'mTeSR1',volumeMl:'2',user:'L. Stokely',note:'Full feed D3',mediaCat:'',mediaLot:'',mediaExp:'',addedAt:daysAgo(39)},
+      ],
+      images:[], plateData:{},
+    },
+    {
+      id:'iPSC-P-B002', parent:'iPSC-TH-A001', line:'iPSC', project:'LS001 - iPSC Expansion',
+      action:'passage', passageNum:9, date:daysAgo(38), days:4,
+      condition:'mTeSR1', substrate:'Matrigel', user:'L. Stokely',
+      wells:'(2) 6-well plate', vessels:[{type:'6-well plate',vesselClass:'plate',qty:2,seeding:'3×10⁴',seedingTotal:'5.7×10⁵',seedingUnit:'cells/cm²'}],
+      seedingTotal:'5.7×10⁵', viableCellsPerMl:'3.8×10⁶', viabilityPct:'95', volumeMl:'3',
+      totalViableCells:'1.14×10⁷', splitRatio:'1:4', confluency:'85',
+      note:'Excellent expansion', feeds:[], images:[], plateData:{},
+    },
+    {
+      id:'iPSC-P-C003', parent:'iPSC-P-B002', line:'iPSC', project:'LS001 - iPSC Expansion',
+      action:'passage', passageNum:10, date:daysAgo(31), days:7,
+      condition:'mTeSR1', substrate:'Matrigel', user:'J. Chen',
+      wells:'(3) 6-well plate', vessels:[{type:'6-well plate',vesselClass:'plate',qty:3,seeding:'3×10⁴',seedingTotal:'8.55×10⁵',seedingUnit:'cells/cm²'}],
+      seedingTotal:'8.55×10⁵', viableCellsPerMl:'4.2×10⁶', viabilityPct:'94', volumeMl:'5',
+      totalViableCells:'2.1×10⁷', splitRatio:'1:6', confluency:'90',
+      feeds:[
+        {date:daysAgo(29),media:'mTeSR1',volumeMl:'6',user:'J. Chen',note:'Full feed',mediaCat:'',mediaLot:'',mediaExp:'',addedAt:daysAgo(29)},
+      ],
+      images:[], plateData:{},
+    },
+    // branch: freeze from P10
+    {
+      id:'iPSC-FZ-D004', parent:'iPSC-P-C003', line:'iPSC', project:'LS001 - iPSC Expansion',
+      action:'freeze', passageNum:11, date:daysAgo(28), days:3,
+      condition:'CS10', substrate:'', user:'L. Stokely',
+      wells:'', vessels:[],
+      vials:'8', cellsPerVial:'1×10⁶', cryo:'CS10', storage:'LN2 Tank A Rack 2',
+      viableCellsPerMl:'5×10⁶', viabilityPct:'96', volumeMl:'8',
+      totalViableCells:'4×10⁷', viability:'94',
+      note:'Master cell bank — 8 vials at 1e6/vial', feeds:[], images:[], plateData:{},
+    },
+    // continue expansion P10 -> P11
+    {
+      id:'iPSC-P-E005', parent:'iPSC-P-C003', line:'iPSC', project:'LS001 - iPSC Expansion',
+      action:'passage', passageNum:11, date:daysAgo(24), days:7,
+      condition:'mTeSR1', substrate:'Matrigel', user:'J. Chen',
+      wells:'(4) 6-well plate', vessels:[{type:'6-well plate',vesselClass:'plate',qty:4,seeding:'3×10⁴',seedingTotal:'1.14×10⁶',seedingUnit:'cells/cm²'}],
+      seedingTotal:'1.14×10⁶', viableCellsPerMl:'4.5×10⁶', viabilityPct:'93', volumeMl:'6',
+      totalViableCells:'2.7×10⁷', splitRatio:'1:6', confluency:'88',
+      feeds:[], images:[], plateData:{},
+    },
+    // discontinued branch — contamination
+    {
+      id:'iPSC-DC-F006', parent:'iPSC-P-E005', line:'iPSC', project:'LS001 - iPSC Expansion',
+      action:'discontinued', passageNum:11, date:daysAgo(20), days:4,
+      condition:'Contamination', user:'J. Chen',
+      note:'Bacterial contamination detected in wells B1-B3. Remaining wells discarded.',
+      feeds:[], images:[], plateData:{},
+    },
+    // new thaw after contamination
+    {
+      id:'iPSC-TH-G007', parent:null, line:'iPSC', project:'LS001 - iPSC Expansion',
+      action:'thaw', passageNum:11, date:daysAgo(18), days:0,
+      condition:'mTeSR1', substrate:'Matrigel', user:'L. Stokely',
+      wells:'(1) 6-well plate', vessels:[{type:'6-well plate',vesselClass:'plate',qty:1,seeding:null,seedingTotal:'5×10⁵',seedingUnit:'cells/cm²'}],
+      vial:'iPSC-FZ-D004 — LN2 Tank A Rack 2',
+      seedingTotal:'5×10⁵', viableCellsPerMl:'3.5×10⁶', viabilityPct:'91', volumeMl:'2',
+      totalViableCells:'7×10⁶', note:'Thawed from MCB after contamination event',
+      feeds:[
+        {date:daysAgo(16),media:'mTeSR1',volumeMl:'2',user:'L. Stokely',note:'Recovery feed D2',mediaCat:'',mediaLot:'',mediaExp:'',addedAt:daysAgo(16)},
+        {date:daysAgo(15),media:'mTeSR1',volumeMl:'2',user:'L. Stokely',note:'Full feed D3',mediaCat:'',mediaLot:'',mediaExp:'',addedAt:daysAgo(15)},
+      ],
+      images:[], plateData:{},
+    },
+    {
+      id:'iPSC-P-H008', parent:'iPSC-TH-G007', line:'iPSC', project:'LS001 - iPSC Expansion',
+      action:'passage', passageNum:12, date:daysAgo(14), days:4,
+      condition:'mTeSR1', substrate:'Matrigel', user:'L. Stokely',
+      wells:'(2) 6-well plate', vessels:[{type:'6-well plate',vesselClass:'plate',qty:2,seeding:'3×10⁴',seedingTotal:'5.7×10⁵',seedingUnit:'cells/cm²'}],
+      seedingTotal:'5.7×10⁵', viableCellsPerMl:'4×10⁶', viabilityPct:'94', volumeMl:'4',
+      totalViableCells:'1.6×10⁷', splitRatio:'1:4', confluency:'82',
+      note:'Good recovery post-contamination', feeds:[], images:[], plateData:{},
+    },
+    {
+      id:'iPSC-EX-I009', parent:'iPSC-P-H008', line:'iPSC', project:'LS001 - iPSC Expansion',
+      action:'experiment', passageNum:13, date:daysAgo(7), days:7,
+      condition:'Differentiation media', substrate:'Matrigel', user:'A. Patel',
+      wells:'(1) 96-well plate', vessels:[{type:'96-well plate',vesselClass:'plate',qty:1,seeding:'2×10⁴',seedingTotal:'6.1×10⁵',seedingUnit:'cells/cm²'}],
+      expId:'EXP-LS001-003', assay:'Cardiomyocyte differentiation pilot',
+      treatment:'Wnt activation protocol D0-D2', timepoints:'D0,D3,D7,D14',
+      seedingTotal:'6.1×10⁵', viableCellsPerMl:'3.2×10⁶', viabilityPct:'92', volumeMl:'5',
+      totalViableCells:'1.6×10⁷',
+      note:'Seeded 96wp for differentiation screen', feeds:[], images:[], plateData:{},
+    },
+
+    // ── HEK293 lineage ───────────────────────────────────────────────────────
+    {
+      id:'HEK-TH-J010', parent:null, line:'HEK293', project:'LS002 - HEK Transfection',
+      action:'thaw', passageNum:5, date:daysAgo(35), days:0,
+      condition:'DMEM 10% FBS', substrate:'TC treated', user:'A. Patel',
+      wells:'(1) T75', vessels:[{type:'T75',vesselClass:'flask',qty:1,seeding:'5×10⁳',seedingTotal:'3.75×10⁶',seedingUnit:'cells/cm²'}],
+      vial:'ATCC HEK293 P5 1e7/vial DOM 09/15/24',
+      seedingTotal:'3.75×10⁶', viableCellsPerMl:'8×10⁶', viabilityPct:'98', volumeMl:'5',
+      totalViableCells:'4×10⁷', note:'Fast recovery, ~80% confluent by D2',
+      feeds:[], images:[], plateData:{},
+    },
+    {
+      id:'HEK-P-K011', parent:'HEK-TH-J010', line:'HEK293', project:'LS002 - HEK Transfection',
+      action:'passage', passageNum:6, date:daysAgo(32), days:3,
+      condition:'DMEM 10% FBS', substrate:'TC treated', user:'A. Patel',
+      wells:'(3) T75', vessels:[{type:'T75',vesselClass:'flask',qty:3,seeding:'5×10⁳',seedingTotal:'1.125×10⁷',seedingUnit:'cells/cm²'}],
+      seedingTotal:'1.125×10⁷', viableCellsPerMl:'1.2×10⁷', viabilityPct:'99', volumeMl:'10',
+      totalViableCells:'1.2×10⁸', splitRatio:'1:10', confluency:'95',
+      feeds:[], images:[], plateData:{},
+    },
+    {
+      id:'HEK-P-L012', parent:'HEK-P-K011', line:'HEK293', project:'LS002 - HEK Transfection',
+      action:'passage', passageNum:7, date:daysAgo(25), days:7,
+      condition:'DMEM 10% FBS', substrate:'TC treated', user:'J. Chen',
+      wells:'(2) T75', vessels:[{type:'T75',vesselClass:'flask',qty:2,seeding:'5×10⁳',seedingTotal:'7.5×10⁶',seedingUnit:'cells/cm²'}],
+      seedingTotal:'7.5×10⁶', viableCellsPerMl:'1.1×10⁷', viabilityPct:'98', volumeMl:'10',
+      totalViableCells:'1.1×10⁸', splitRatio:'1:10', confluency:'90',
+      feeds:[], images:[], plateData:{},
+    },
+    // freeze HEK
+    {
+      id:'HEK-FZ-M013', parent:'HEK-P-L012', line:'HEK293', project:'LS002 - HEK Transfection',
+      action:'freeze', passageNum:8, date:daysAgo(22), days:3,
+      condition:'10% DMSO in FBS', substrate:'', user:'A. Patel',
+      wells:'', vessels:[],
+      vials:'6', cellsPerVial:'5×10⁶', cryo:'10% DMSO in FBS', storage:'LN2 Tank B Rack 1',
+      viableCellsPerMl:'9×10⁶', viabilityPct:'98', volumeMl:'6',
+      totalViableCells:'5.4×10⁷', viability:'92',
+      note:'Working cell bank — 6 vials at 5e6/vial', feeds:[], images:[], plateData:{},
+    },
+    // experiment — transfection
+    {
+      id:'HEK-EX-N014', parent:'HEK-P-L012', line:'HEK293', project:'LS002 - HEK Transfection',
+      action:'experiment', passageNum:8, date:daysAgo(21), days:4,
+      condition:'DMEM 10% FBS', substrate:'TC treated', user:'J. Chen',
+      wells:'(1) 6-well plate', vessels:[{type:'6-well plate',vesselClass:'plate',qty:1,seeding:'3×10⁵',seedingTotal:'2.85×10⁶',seedingUnit:'cells/cm²'}],
+      expId:'EXP-LS002-001', assay:'Lipofectamine 3000 transfection optimization',
+      treatment:'GFP plasmid — 0.5/1/2/4μg per well', timepoints:'24h,48h,72h',
+      seedingTotal:'2.85×10⁶', viableCellsPerMl:'8.5×10⁶', viabilityPct:'99', volumeMl:'5',
+      totalViableCells:'4.25×10⁷',
+      note:'Testing 4 DNA concentrations in duplicate', feeds:[], images:[], plateData:{},
+    },
+    {
+      id:'HEK-P-O015', parent:'HEK-P-L012', line:'HEK293', project:'LS002 - HEK Transfection',
+      action:'passage', passageNum:8, date:daysAgo(18), days:7,
+      condition:'DMEM 10% FBS', substrate:'TC treated', user:'A. Patel',
+      wells:'(2) T75', vessels:[{type:'T75',vesselClass:'flask',qty:2,seeding:'5×10⁳',seedingTotal:'7.5×10⁶',seedingUnit:'cells/cm²'}],
+      seedingTotal:'7.5×10⁶', viableCellsPerMl:'1.05×10⁷', viabilityPct:'99', volumeMl:'10',
+      totalViableCells:'1.05×10⁸', splitRatio:'1:10', confluency:'95',
+      feeds:[], images:[], plateData:{},
+    },
+  ];
+
+  LM = {};
+  updLF();
+  renderL();
+  renderProjectDropdown();
+  renderMemberList();
+  refreshIO();
+  toast('Demo data loaded — ' + passages.length + ' records across iPSC and HEK293 lineages');
 }
 
 </script>
