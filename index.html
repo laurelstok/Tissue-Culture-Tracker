@@ -392,7 +392,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
           <div class="wfr">
             <label>Seeding density</label>
             <div style="display:flex;gap:4px;align-items:center">
-              <input id="pm-seed" placeholder="e.g. 5000 cells/cm2" oninput="pDirty();pSciPreview('pm-seed','pm-seed-sci')">
+              <input id="pm-seed" placeholder="e.g. 5000 cells/cm2" oninput="if(PM.selWell){const _w=getPW(PM.selWell);_w.seeding=document.getElementById('pm-seed').value.trim();_w.count=document.getElementById('pm-count').value.trim();_w.cond=document.getElementById('pm-cond').value.trim();_w.treat=document.getElementById('pm-treat').value.trim();_w.note=document.getElementById('pm-note').value.trim();_w.occupied=!!(_w.seeding||_w.count||_w.cond||_w.treat||_w.note);renderPSum();};pSciPreview('pm-seed','pm-seed-sci')">
               <button class="sci-btn" onclick="pFmtSci('pm-seed','pm-seed-sci')">sci</button>
             </div>
             <div class="sci-preview" id="pm-seed-sci"></div>
@@ -400,15 +400,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
           <div class="wfr">
             <label>Cell count seeded</label>
             <div style="display:flex;gap:4px;align-items:center">
-              <input id="pm-count" placeholder="e.g. 50000" oninput="pDirty();pSciPreview('pm-count','pm-count-sci')">
+              <input id="pm-count" placeholder="e.g. 50000" oninput="if(PM.selWell){const _w=getPW(PM.selWell);_w.seeding=document.getElementById('pm-seed').value.trim();_w.count=document.getElementById('pm-count').value.trim();_w.cond=document.getElementById('pm-cond').value.trim();_w.treat=document.getElementById('pm-treat').value.trim();_w.note=document.getElementById('pm-note').value.trim();_w.occupied=!!(_w.seeding||_w.count||_w.cond||_w.treat||_w.note);renderPSum();};pSciPreview('pm-count','pm-count-sci')">
               <button class="sci-btn" onclick="pFmtSci('pm-count','pm-count-sci')">sci</button>
             </div>
             <div class="sci-preview" id="pm-count-sci"></div>
           </div>
-          <div class="wfr"><label>Medium / condition</label><input id="pm-cond" placeholder="e.g. DMEM 10% FBS" oninput="pDirty()"></div>
-          <div class="wfr"><label>Treatment</label><input id="pm-treat" placeholder="e.g. 10uM compound A" oninput="pDirty()"></div>
+          <div class="wfr"><label>Medium / condition</label><input id="pm-cond" placeholder="e.g. DMEM 10% FBS" oninput="if(PM.selWell){const _w=getPW(PM.selWell);_w.seeding=document.getElementById('pm-seed').value.trim();_w.count=document.getElementById('pm-count').value.trim();_w.cond=document.getElementById('pm-cond').value.trim();_w.treat=document.getElementById('pm-treat').value.trim();_w.note=document.getElementById('pm-note').value.trim();_w.occupied=!!(_w.seeding||_w.count||_w.cond||_w.treat||_w.note);renderPSum();}"></div>
+          <div class="wfr"><label>Treatment</label><input id="pm-treat" placeholder="e.g. 10uM compound A" oninput="if(PM.selWell){const _w=getPW(PM.selWell);_w.seeding=document.getElementById('pm-seed').value.trim();_w.count=document.getElementById('pm-count').value.trim();_w.cond=document.getElementById('pm-cond').value.trim();_w.treat=document.getElementById('pm-treat').value.trim();_w.note=document.getElementById('pm-note').value.trim();_w.occupied=!!(_w.seeding||_w.count||_w.cond||_w.treat||_w.note);renderPSum();}"></div>
         </div>
-        <div class="wfr"><label>Notes</label><textarea id="pm-note" placeholder="Observations, timepoints, any issues..." oninput="pDirty()"></textarea></div>
+        <div class="wfr"><label>Notes</label><textarea id="pm-note" placeholder="Observations, timepoints, any issues..." oninput="if(PM.selWell){const _w=getPW(PM.selWell);_w.seeding=document.getElementById('pm-seed').value.trim();_w.count=document.getElementById('pm-count').value.trim();_w.cond=document.getElementById('pm-cond').value.trim();_w.treat=document.getElementById('pm-treat').value.trim();_w.note=document.getElementById('pm-note').value.trim();_w.occupied=!!(_w.seeding||_w.count||_w.cond||_w.treat||_w.note);renderPSum();}"></textarea></div>
         <div class="weact">
           <button class="btn btn-sm btn-p" onclick="pApplyWell()">Apply</button>
           <button class="btn btn-sm btn-red" id="pm-cont-btn" onclick="pToggleCont()">Flag contaminated</button>
@@ -882,6 +882,7 @@ function openPMExp(vesselType){
   document.getElementById('pm-bulk').classList.remove('on');
   renderPGrid();renderPSum();
   document.getElementById('pmbg').classList.add('on');
+  setTimeout(attachWellEditorListeners,50);
 }
 
 function openPMThawNew(vesselType){
@@ -893,7 +894,7 @@ function openPMThawNew(vesselType){
 }
 
 // ── vessel list (passage) ──
-function addV(type,qty,seeding,seedingTotal){VL.push({id:'v'+Date.now()+Math.random().toString(36).slice(2,5),type:type||'',qty:qty||1,seeding:seeding||'',seedingTotal:seedingTotal||'',custom:''});renderVL();}
+function addV(type,qty,seeding,seedingTotal){VL.push({id:'v'+Date.now()+Math.random().toString(36).slice(2,5),type:type||'',qty:qty||1,seeding:seeding||'',seedingTotal:seedingTotal||'',custom:'',cond:'',treat:''});renderVL();}
 function remV(id){VL=VL.filter(v=>v.id!==id);renderVL();}
 function updVF(id,field,val){const v=VL.find(v=>v.id===id);if(!v)return;if(field==='qty')v.qty=Math.max(1,parseInt(val)||1);else if(field==='wellsSeeded')v.wellsSeeded=parseInt(val)||1;else v[field]=val;if(field==='type')renderVL();else updVSum();}
 
@@ -991,6 +992,12 @@ function renderVL(){
           +(MS.editId||MS._tempId?'<button class="plate-btn" style="margin-top:4px" onclick="openPMPassage(\'v_'+v.id+'\',\''+v.type+'\')">\u26f6 Per-well detail</button>':'')
           +'</div>'
           +'</div>';
+          +'<div class="seed-row" style="margin-top:6px">'
+          +'<div class="fr"><label style="font-size:11px;color:var(--tx2)">Condition</label>'
+          +'<input type="text" value="'+esc(v.cond||'')+'" placeholder="e.g. +iROCK" oninput="updVF(\''+v.id+'\',\'cond\',this.value)" style="font-size:12px;padding:5px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%"></div>'
+          +'<div class="fr"><label style="font-size:11px;color:var(--tx2)">Treatment</label>'
+          +'<input type="text" value="'+esc(v.treat||'')+'" placeholder="e.g. 10μM drug" oninput="updVF(\''+v.id+'\',\'treat\',this.value)" style="font-size:12px;padding:5px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%"></div>'
+          +'</div>';
       } else {
         // FLASK/DISH: density + auto-total
         const densLabel=susp?'Cells / mL':'Cells / cm\u00b2';
@@ -1010,6 +1017,12 @@ function renderVL(){
           +'</div>'
           +'</div>';
       }
+      body += '<div class="seed-row" style="margin-top:6px">'
+        +'<div class="fr"><label style="font-size:11px;color:var(--tx2)">Condition</label>'
+        +'<input type="text" value="'+esc(v.cond||'')+'" placeholder="e.g. DMEM 10% FBS" oninput="updVF(\''+v.id+'\',\'cond\',this.value)" style="font-size:12px;padding:5px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%"></div>'
+        +'<div class="fr"><label style="font-size:11px;color:var(--tx2)">Treatment</label>'
+        +'<input type="text" value="'+esc(v.treat||'')+'" placeholder="e.g. 10μM drug" oninput="updVF(\''+v.id+'\',\'treat\',this.value)" style="font-size:12px;padding:5px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%"></div>'
+        +'</div>';
       body += (ic?'<div class="fr" style="margin-top:6px"><input placeholder="Describe vessel..." value="'+esc(v.custom)+'" oninput="updVF(\''+v.id+'\',\'custom\',this.value)" style="font-size:12px;padding:5px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%"></div>':'');
     }
 
@@ -1134,12 +1147,19 @@ function subFeed(recId){
 
 function openPM(recId,vesselKey,vesselType){
   document.getElementById('mbg').classList.remove('on');
-  const rec=passages.find(p=>p.id===recId);
-  PM.recId=recId;PM.vesselKey=vesselKey;PM.selWell=null;PM.selWells=new Set();
+  const rec=passages.find(p=>p.id===recId)||(MS._stub&&MS._stub.id===recId?MS._stub:null);
+  PM.recId=recId;PM.vesselKey=vesselKey;PM.vesselType=vesselType;PM.selWell=null;PM.selWells=new Set();
   const num=plateNumFromType(vesselType);
   PM.fmt=[6,12,24,48,96,384].includes(num)?num:6;
   document.getElementById('pm-fmt').value=PM.fmt;
   PM.wells=(rec&&rec.plateData&&rec.plateData[vesselKey])||{};
+  // apply clipboard layout if this is a fresh plate with no wells
+  // apply clipboard layout if this is a fresh plate with no wells
+  if(PM._layoutClipboard&&Object.keys(PM.wells).length===0&&PM._layoutType===vesselType){
+    PM.wells=JSON.parse(JSON.stringify(PM._layoutClipboard));
+    PM._layoutClipboard=null;
+    toast('Well layout applied from duplicate — counts are blank');
+  }
   buildPIds();
   document.getElementById('pm-title').textContent='Plate viewer - '+vesselType;
   document.getElementById('pm-sub').textContent=(rec?rec.id+' - '+pL(rec)+' - '+rec.line:'');
@@ -1163,6 +1183,7 @@ function openPMThaw(recId,wellsStr){
   document.getElementById('pm-bulk').classList.remove('on');
   renderPGrid();renderPSum();
   document.getElementById('pmbg').classList.add('on');
+  setTimeout(attachWellEditorListeners,50);
 }
 
 function setPF(f){PM.fmt=parseInt(f);PM.selWell=null;PM.selWells=new Set();buildPIds();renderPGrid();renderPSum();document.getElementById('pm-we').style.display='none';document.getElementById('pm-bulk').classList.remove('on');}
@@ -1186,6 +1207,7 @@ function renderPGrid(){
 }
 
 function pClickWell(e,id){
+  if(PM.selWell && PM.selWell!==id){const dirty=document.getElementById('pm-dirty');if(dirty&&dirty.style.display!=='none')pApplyWell();}
   if(e.shiftKey){if(PM.selWell){PM.selWells.add(PM.selWell);PM.selWell=null;}if(PM.selWells.has(id))PM.selWells.delete(id);else PM.selWells.add(id);if(PM.selWells.size===1){PM.selWell=[...PM.selWells][0];PM.selWells.clear();}}
   else{PM.selWells.clear();PM.selWell=id;}
   renderPGrid();
@@ -1220,6 +1242,7 @@ function showPWE(id){
   document.getElementById('pm-cont-btn').textContent=w.contaminated?'Clear contamination':'Flag contaminated';
   document.getElementById('pm-cont-btn').className='btn btn-sm '+(w.contaminated?'btn-ok':'btn-red');
   document.getElementById('pm-dirty').style.display='none';
+  attachWellEditorListeners();
   // render well image section if we have a record ID
   const wellImgWrap = document.getElementById('pm-well-imgs');
   if(wellImgWrap && PM.recId && passages.find(p=>p.id===PM.recId)) {
@@ -1258,12 +1281,12 @@ function renderPSum(){
 }
 
 function savePM(){
-  const weVisible=document.getElementById('pm-we')&&document.getElementById('pm-we').style.display!=='none';
-  const dirty=document.getElementById('pm-dirty')&&document.getElementById('pm-dirty').style.display!=='none';
-  if(weVisible&&dirty)pApplyWell();
+  // pAutoSave keeps PM.wells current on every keystroke
+  // flush the current well one more time just in case
+  pAutoSave();
   let rec=passages.find(p=>p.id===PM.recId);
   if(!rec&&MS&&MS._stub&&MS._stub.id===PM.recId)rec=MS._stub;
-  if(!rec){rec={id:PM.recId,action:'thaw',line:'',passageNum:0,plateData:{}};if(MS)MS._stub=rec;}
+  if(!rec){rec={id:PM.recId,action:MS.action||'thaw',line:'',passageNum:0,plateData:{}};if(MS)MS._stub=rec;}
   if(!rec.plateData)rec.plateData={};
   const data={};PM.allIds.forEach(id=>{if(PM.wells[id]&&(PM.wells[id].occupied||PM.wells[id].contaminated))data[id]=PM.wells[id];});
   rec.plateData[PM.vesselKey]=data;
@@ -1362,7 +1385,7 @@ function openF(pid,action){
       +'</div></div></div></div>'
       +'<div class="fr"><label>Notes</label><textarea id="fn" placeholder="Authentication, mycoplasma, STR profile...">'+esc(d.note||'')+'</textarea></div>';
   } else if(act==='passage'){
-    if(isE&&d.vessels&&d.vessels.length){d.vessels.forEach(v=>VL.push({id:'v'+Date.now()+Math.random().toString(36).slice(2,5),type:v.type,qty:v.qty||1,seeding:v.seeding||'',seedingTotal:v.seedingTotal||'',custom:''}));}
+    if(isE&&d.vessels&&d.vessels.length){d.vessels.forEach(v=>VL.push({id:v.id||('v'+Date.now()+Math.random().toString(36).slice(2,5)),type:v.type,qty:v.qty||1,seeding:v.seeding||'',seedingTotal:v.seedingTotal||'',custom:'',cond:v.cond||'',treat:v.treat||''}));}
     body+='<div class="fsec">Passage details</div><div class="fg">'
       +'<div class="fr"><label>Passage date</label><input id="fdt" type="date" value="'+esc(d.date||'')+'" oninput="onDC()"></div>'
       +dR(d.days)
@@ -1396,7 +1419,7 @@ function openF(pid,action){
       +'<div class="fr"><label>Notes</label><textarea id="fn" placeholder="Reason for freeze, any notes...">'+esc(d.note||'')+'</textarea></div>';
   } else if(act==='experiment'){
     const expVesselIsPlate=isE&&d.wells&&PLATES.some(p=>d.wells===p);
-    body+='<div class="fsec">Experiment</div><div class="fg">'
+    body+='<div class="fsec" style="display:flex;align-items:center;justify-content:space-between"><span>Experiment</span>'+(isE?'<button class="plate-btn" onclick="duplicateExperimentAsTimepoint()" style="font-size:11px">&#9633; Duplicate as new timepoint</button>':'')+'</div><div class="fg">';
       +'<div class="fr"><label>Experiment ID</label><input id="fei" value="'+esc(d.expId||'')+'" placeholder="e.g. EXP-001"></div>'
       +'<div class="fr"><label>Start date</label><input id="fdt" type="date" value="'+esc(d.date||'')+'" oninput="onDC()"></div>'
       +dR(d.days)
@@ -1452,7 +1475,7 @@ function subF(){
     const act=n.action;
     n.date=fv('fdt')||n.date;n.days=fi('fd');n.user=getOperatorValue()||n.user;n.note=fv('fn')||n.note;
     if(act==='thaw'||act==='inherit'){if(act==='thaw')Object.assign(n,getCCData('thaw'));n.wells=getThawWells();n.condition=fv('fc');n.substrate=fv('fsub');n.project=fv('f-project');n.seedingDensity=fv('thaw-seed-density');n.seedingTotal=fv('thaw-seed-total');n.seedingUnit=n.wells==='Spinner flask'?'cells/mL':'cells/cm\u00b2';}
-    if(act==='passage'){Object.assign(n,getCCData('pass'));const fil=VL.filter(v=>v.type&&v.type!=='');if(fil.length){n.vessels=fil.map(v=>({type:v.type==='Custom...'?(v.custom||'Custom'):v.type,vesselClass:isPlate(v.type)?'plate':'flask',qty:v.qty,seeding:v.seeding||null,seedingTotal:v.seedingTotal||null,seedingUnit:v.type==='Spinner flask'?'cells/mL':'cells/cm\u00b2'}));n.wells=fil.map(v=>'('+v.qty+') '+(v.type==='Custom...'?(v.custom||'Custom'):v.type)).join(', ');}n.condition=fv('fc');n.substrate=fv('fsub');n.splitRatio=fv('fsp');n.confluency=fv('fco');}
+    if(act==='passage'){Object.assign(n,getCCData('pass'));const fil=VL.filter(v=>v.type&&v.type!=='');if(fil.length){n.vessels=fil.map(v=>({id:v.id,type:v.type==='Custom...'?(v.custom||'Custom'):v.type,vesselClass:isPlate(v.type)?'plate':'flask',qty:v.qty,seeding:v.seeding||null,seedingTotal:v.seedingTotal||null,seedingUnit:v.type==='Spinner flask'?'cells/mL':'cells/cm\u00b2',cond:v.cond||'',treat:v.treat||''}));n.wells=fil.map(v=>'('+v.qty+') '+(v.type==='Custom...'?(v.custom||'Custom'):v.type)).join(', ');}n.condition=fv('fc');n.substrate=fv('fsub');n.splitRatio=fv('fsp');n.confluency=fv('fco');}
     if(act==='freeze'){Object.assign(n,getCCData('frz'));n.vials=fv('fvi');n.cellsPerVial=fv('fcv');n.cryo=fv('fcr');n.storage=fv('fst');n.viability=fv('fvb');}
     if(act==='experiment'){Object.assign(n,getCCData('exp'));const incPe=document.getElementById('exp-inc-p');if(incPe){const parRec=passages.find(function(p){return p.id===n.parent;});n.passageNum=(incPe.checked&&parRec)?(parRec.passageNum+1):(parRec?parRec.passageNum:n.passageNum);}n.expId=fv('fei');n.assay=fv('fas');n.treatment=fv('ftr');n.timepoints=fv('ftp2');n.wells=getThawWells();}
     closeM();renderL();toast('Record updated');return;
@@ -1494,7 +1517,7 @@ function subF(){
       rec.plateData=MS._stub.plateData;
     }
   }
-  if(ms.action==='passage'){Object.assign(rec,getCCData('pass'));const fil=VL.filter(v=>v.type&&v.type!=='');if(!fil.length){alert('Please add at least one destination vessel.');return;}rec.vessels=fil.map(v=>({type:v.type==='Custom...'?(v.custom||'Custom'):v.type,vesselClass:isPlate(v.type)?'plate':'flask',qty:v.qty,seeding:v.seeding||null,seedingTotal:v.seedingTotal||null,seedingUnit:v.type==='Spinner flask'?'cells/mL':'cells/cm\u00b2'}));rec.wells=fil.map(v=>'('+v.qty+') '+(v.type==='Custom...'?(v.custom||'Custom'):v.type)).join(', ');rec.splitRatio=fv('fsp');rec.confluency=fv('fco');}
+  if(ms.action==='passage'){Object.assign(rec,getCCData('pass'));const fil=VL.filter(v=>v.type&&v.type!=='');if(!fil.length){alert('Please add at least one destination vessel.');return;}rec.vessels=fil.map(v=>({id:v.id,type:v.type==='Custom...'?(v.custom||'Custom'):v.type,vesselClass:isPlate(v.type)?'plate':'flask',qty:v.qty,seeding:v.seeding||null,seedingTotal:v.seedingTotal||null,seedingUnit:v.type==='Spinner flask'?'cells/mL':'cells/cm\u00b2',cond:v.cond||'',treat:v.treat||''}));rec.wells=fil.map(v=>'('+v.qty+') '+(v.type==='Custom...'?(v.custom||'Custom'):v.type)).join(', ');rec.splitRatio=fv('fsp');rec.confluency=fv('fco');}
     if(MS._stub&&MS._stub.plateData&&Object.keys(MS._stub.plateData).length){rec.plateData=MS._stub.plateData;}
     else if(PM.vesselKey&&PM.allIds.length){const dp={};PM.allIds.forEach(function(id){if(PM.wells[id]&&(PM.wells[id].occupied||PM.wells[id].contaminated))dp[id]=PM.wells[id];});if(Object.keys(dp).length){rec.plateData={};rec.plateData[PM.vesselKey]=dp;}}
   if(ms.action==='freeze'){Object.assign(rec,getCCData('frz'));rec.passageNum=(par?par.passageNum+1:rec.passageNum);rec.vials=fv('fvi');rec.cellsPerVial=fv('fcv');rec.cryo=fv('fcr');rec.storage=fv('fst');rec.viability=fv('fvb');}
@@ -2683,6 +2706,103 @@ function loadDemoData() {
   renderMemberList();
   refreshIO();
   toast('Demo data loaded — ' + passages.length + ' records across iPSC and HEK293 lineages');
+}
+
+
+// ── Plate duplication ────────────────────────────────────────────────────────
+
+function copyWellLayout(plateData) {
+  // deep copy well layout, clearing counts but keeping conditions/treatments
+  const copy = {};
+  Object.keys(plateData).forEach(function(wid) {
+    const w = plateData[wid];
+    copy[wid] = {
+      seeding:      w.seeding || '',
+      count:        '',          // blank counts
+      cond:         w.cond || '',
+      treat:        w.treat || '',
+      note:         w.note || '',
+      occupied:     w.occupied || false,
+      contaminated: false,
+    };
+  });
+  return copy;
+}
+
+
+function duplicateExperimentAsTimepoint() {
+  // duplicate current experiment record as a new child record
+  const recId = MS.editId;
+  if(!recId) { toast('Save the record first, then duplicate'); return; }
+  const src = passages.find(function(p){ return p.id === recId; });
+  if(!src) return;
+
+  const newId = gId(src.line, 'experiment');
+  const newRec = JSON.parse(JSON.stringify(src)); // deep copy
+
+  // clear counts from all plate wells, keep layout
+  if(newRec.plateData) {
+    Object.keys(newRec.plateData).forEach(function(pk) {
+      Object.keys(newRec.plateData[pk]).forEach(function(wid) {
+        newRec.plateData[pk][wid].count = '';
+        newRec.plateData[pk][wid].contaminated = false;
+      });
+    });
+  }
+
+  // reset identifying fields
+  newRec.id = newId;
+  newRec.parent = recId;
+  newRec.date = tod();
+  newRec.days = 0;
+  newRec.note = '';
+  newRec.feeds = [];
+  newRec.images = [];
+  // clear cell count fields
+  newRec.viableCellsPerMl = '';
+  newRec.viabilityPct = '';
+  newRec.volumeMl = '';
+  newRec.totalViableCells = '';
+
+  passages.push(newRec);
+  renderL();
+  toast('New timepoint record created: ' + newId);
+  closeM();
+  // open the new record for editing
+  setTimeout(function(){ openF(recId, 'experiment', newId); }, 100);
+}
+
+
+function pAutoSave(){
+  if(!PM.selWell&&PM.selWells.size===0)return;
+  const id=PM.selWell||[...PM.selWells][0];
+  if(!id)return;
+  const w=getPW(id);
+  w.seeding=document.getElementById('pm-seed')?document.getElementById('pm-seed').value.trim():'';
+  w.count=document.getElementById('pm-count')?document.getElementById('pm-count').value.trim():'';
+  w.cond=document.getElementById('pm-cond')?document.getElementById('pm-cond').value.trim():'';
+  w.treat=document.getElementById('pm-treat')?document.getElementById('pm-treat').value.trim():'';
+  w.note=document.getElementById('pm-note')?document.getElementById('pm-note').value.trim():'';
+  w.occupied=!!(w.seeding||w.count||w.cond||w.treat||w.note);
+  // update well appearance without full re-render
+  const wellEl=document.querySelector('.well.wsel');
+  if(wellEl){
+    wellEl.classList.toggle('occ',w.occupied);
+    const dot=wellEl.querySelector('.wdot');
+    if(w.occupied&&!dot){const d=document.createElement('span');d.className='wdot';wellEl.appendChild(d);}
+    else if(!w.occupied&&dot)dot.remove();
+  }
+  renderPSum();
+}
+
+
+function attachWellEditorListeners(){
+  ['pm-seed','pm-count','pm-cond','pm-treat','pm-note'].forEach(function(eid){
+    const el=document.getElementById(eid);
+    if(!el)return;
+    el.removeEventListener('input',pAutoSave);
+    el.addEventListener('input',pAutoSave);
+  });
 }
 
 </script>
