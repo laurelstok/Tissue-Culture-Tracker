@@ -3,9 +3,31 @@
 TC Tracker local server — run with: python3 server.py
 Then open: http://localhost:8081
 """
-import os, cgi, json, shutil, io, re
+import os, cgi, json, shutil, io, re, subprocess, tempfile
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import urlparse
+try:
+    import urllib.request as _urllib_req
+    _HAS_URLLIB = True
+except ImportError:
+    _HAS_URLLIB = False
+
+# ── Confluency API settings ───────────────────────────────────────────────────
+# Set CONFLUENCY_API_URL to the address of your confluency_api.py server
+# e.g. http://192.168.1.50:8082
+SETTINGS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tc_settings.json')
+
+def load_settings():
+    if os.path.exists(SETTINGS_FILE):
+        try:
+            with open(SETTINGS_FILE) as f:
+                return json.load(f)
+        except: pass
+    return {'confluency_api_url': ''}
+
+def save_settings(data):
+    with open(SETTINGS_FILE, 'w') as f:
+        json.dump(data, f, indent=2)
 
 UPLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'images')
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -451,6 +473,14 @@ class TCHandler(SimpleHTTPRequestHandler):
             self.handle_excel_export()
         elif parsed.path == '/preview-excel':
             self.handle_excel_preview()
+        elif parsed.path == '/generate-report':
+            self.handle_generate_report()
+        elif parsed.path == '/proxy-confluency':
+            self.handle_proxy_confluency()
+        elif parsed.path == '/get-settings':
+            self.handle_get_settings()
+        elif parsed.path == '/save-settings':
+            self.handle_save_settings()
         elif parsed.path == '/import-excel':
             self.handle_excel_import()
         else:
@@ -544,6 +574,82 @@ class TCHandler(SimpleHTTPRequestHandler):
             self.send_json(200, {'filename': fn, 'size': size})
         except Exception as e:
             print('  [upload error]', e)
+            self.send_json(500, {'error': str(e)})
+
+    def handle_generate_report(self):
+        try:
+            length = int(self.headers.get('Content-Length', 0))
+            body = self.rfile.read(length).decode()
+            # Write temp json file
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+                f.write(body)
+                tmp_json = f.name
+            # Output pptx path
+            out_pptx = tmp_json.replace('.json', '.pptx')
+            # Find generate_report.js next to server.py
+            script = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'generate_report.js')
+            if not os.path.exists(script):
+                self.send_json(404, {'error': 'generate_report.js not found next to server.py'})
+                return
+            result = subprocess.run(
+                ['node', script, body, out_pptx],
+                capture_output=True, text=True, timeout=60
+            )
+            if result.returncode != 0 or not os.path.exists(out_pptx):
+                self.send_json(500, {'error': result.stderr or 'Report generation failed'})
+                return
+            with open(out_pptx, 'rb') as f:
+                pptx_data = f.read()
+            os.unlink(tmp_json)
+            os.unlink(out_pptx)
+            fn = (json.loads(body).get('rec', {}).get('expId') or 'experiment_report') + '.pptx'
+            fn = fn.replace('/', '_').replace(' ', '_')
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/vnd.openxmlformats-officedocument.presentationml.presentation')
+            self.send_header('Content-Disposition', 'attachment; filename="{}"'.format(fn))
+            self.send_header('Content-Length', str(len(pptx_data)))
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(pptx_data)
+            print('  [report] generated {}'.format(fn))
+        except Exception as e:
+            import traceback; traceback.print_exc()
+            self.send_json(500, {'error': str(e)})
+
+    def handle_get_settings(self):
+        self.send_json(200, load_settings())
+
+    def handle_save_settings(self):
+        try:
+            length = int(self.headers.get('Content-Length', 0))
+            body = json.loads(self.rfile.read(length))
+            settings = load_settings()
+            settings.update(body)
+            save_settings(settings)
+            self.send_json(200, {'ok': True, 'settings': settings})
+        except Exception as e:
+            self.send_json(500, {'error': str(e)})
+
+    def handle_proxy_confluency(self):
+        try:
+            length = int(self.headers.get('Content-Length', 0))
+            body = self.rfile.read(length)
+            settings = load_settings()
+            api_url = settings.get('confluency_api_url', '').rstrip('/')
+            if not api_url:
+                self.send_json(400, {'error': 'Confluency API URL not configured. Set it in TC Tracker settings.'})
+                return
+            req = _urllib_req.Request(
+                api_url + '/analyze',
+                data=body,
+                headers={'Content-Type': 'application/json'},
+                method='POST'
+            )
+            with _urllib_req.urlopen(req, timeout=120) as resp:
+                result = json.loads(resp.read())
+            print('  [confluency proxy] {} images analyzed'.format(result.get('summary', {}).get('analyzed', '?')))
+            self.send_json(200, result)
+        except Exception as e:
             self.send_json(500, {'error': str(e)})
 
     def send_json(self, code, data):

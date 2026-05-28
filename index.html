@@ -218,6 +218,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <button class="tab on" onclick="showTab('lineage',this)">Lineage tree</button>
   <button class="tab" onclick="showTab('log',this)">Passage log</button>
   <button class="tab" onclick="showTab('overview',this)">Overview</button>
+  <button class="tab" onclick="showTab('ln2',this)">LN2 Inventory</button>
   <button class="tab" onclick="showTab('io',this)" style="margin-left:auto">Import / Export</button>
 </div>
 
@@ -258,6 +259,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="gs" id="gs"></div>
 </div>
 
+<div class="panel" id="tab-ln2">
+  <div style="padding:14px 16px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <span style="font-size:13px;font-weight:500">LN2 Inventory</span>
+      <select id="ln2-filter" class="fsel" onchange="renderLN2()"><option value="all">All lines</option></select>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx2);margin-left:auto">
+        <input type="checkbox" id="ln2-show-depleted" onchange="renderLN2()"> Show depleted
+      </label>
+    </div>
+    <div id="ln2-body"></div>
+  </div>
+</div>
+
 <div class="panel" id="tab-io">
 <div class="iopanel">
   <div class="iosec">
@@ -287,6 +301,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="iodesc">Checks for broken parent references, duplicate IDs, and missing required fields.</div>
     <button class="btn" onclick="runDQ()">&#10003; Run check</button>
     <div id="dq-results" style="margin-top:10px"></div>
+  </div>
+  <div class="iosec">
+    <div class="iotitle">Confluency analyzer</div>
+    <div class="iodesc">Set the URL of your confluency API server (runs confluency_api.py on the analysis machine).</div>
+    <div style="display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;margin-bottom:8px">
+      <input id="conf-api-url" placeholder="e.g. http://192.168.1.50:8082" style="font-size:12px;padding:5px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit">
+      <button class="btn btn-ok" onclick="saveConfluencyURL()">Save</button>
+    </div>
+    <div id="conf-api-status" style="font-size:11px;color:var(--tx2);margin-bottom:10px"></div>
+    <div style="font-size:12px;font-weight:500;margin-bottom:4px">Base image folder</div>
+    <div style="font-size:11px;color:var(--tx2);margin-bottom:6px">Record ID will be appended automatically — e.g. base + <code>EXP-LS001-003/</code></div>
+    <div style="display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center">
+      <input id="conf-base-folder" placeholder="e.g. //server/share/TC pics/" style="font-size:12px;padding:5px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;font-family:monospace">
+      <button class="btn btn-ok" onclick="saveConfluencyURL()">Save</button>
+    </div>
+    <div style="font-size:11px;color:var(--tx2);margin-top:6px" id="conf-base-preview"></div>
   </div>
   <div class="iosec">
     <div class="iotitle">Lab members</div>
@@ -420,7 +450,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
     <div class="pmft">
       <button class="btn" onclick="closePM()">Cancel</button>
+      <button class="btn" onclick="openConfluencyPanel()" style="border-color:#854F0B;color:#854F0B">&#9685; Analyze confluency</button>
       <button class="btn btn-p" onclick="savePM()">Save plate data</button>
+    </div>
+    <div id="conf-panel" style="display:none;padding:10px 16px 12px;border-top:0.5px solid var(--bd);background:var(--bg2)">
+      <div style="font-size:12px;font-weight:500;margin-bottom:8px">Confluency analysis</div>
+      <div class="fg">
+        <div class="fr"><label style="font-size:11px">Image folder (network path)</label>
+          <input id="conf-folder" placeholder="e.g. //server/share/experiment/images" style="font-size:12px;padding:5px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg);color:var(--tx);font-family:inherit;width:100%">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+          <div class="fr" style="margin-bottom:0"><label style="font-size:10px;color:var(--tx2)">Threshold offset</label>
+            <input id="conf-thresh" type="number" value="-36" style="font-size:12px;padding:4px 6px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg);color:var(--tx);font-family:inherit;width:100%">
+          </div>
+          <div class="fr" style="margin-bottom:0"><label style="font-size:10px;color:var(--tx2)">Min hole size</label>
+            <input id="conf-hole" type="number" value="200" style="font-size:12px;padding:4px 6px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg);color:var(--tx);font-family:inherit;width:100%">
+          </div>
+          <div class="fr" style="margin-bottom:0"><label style="font-size:10px;color:var(--tx2)">Dead cell threshold</label>
+            <input id="conf-dead" type="number" value="180" style="font-size:12px;padding:4px 6px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg);color:var(--tx);font-family:inherit;width:100%">
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+        <button class="btn btn-ok" onclick="runConfluencyAnalysis()">&#9654; Run analysis</button>
+        <button class="btn" onclick="document.getElementById('conf-panel').style.display='none'">Cancel</button>
+        <span id="conf-status" style="font-size:11px;color:var(--tx2)"></span>
+      </div>
     </div>
   </div>
 </div>
@@ -549,7 +604,8 @@ function showIR(ok,msg){const e=document.getElementById('ir');if(!e)return;e.cla
 function refreshIO(){const json=JSON.stringify(bld(),null,2);const fn=document.getElementById('efn');if(fn)fn.textContent='tc-records-'+tod()+'.json';const pv=document.getElementById('jpv');if(pv)pv.textContent=json.slice(0,600)+(json.length>600?'\n\n... ('+passages.length+' records total)':'');}
 
 // ── tabs ──
-function showTab(id,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));document.getElementById('tab-'+id).classList.add('on');el.classList.add('on');if(id==='log')renderLog();else if(id==='overview')renderOV();else if(id==='io'){refreshIO();renderProjList();renderMemberList();document.getElementById('dq-results').innerHTML='';}else renderL();}
+function showTab(id,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));document.getElementById('tab-'+id).classList.add('on');el.classList.add('on');if(id==='log')renderLog();else if(id==='overview')renderOV();else if(id==='io'){refreshIO();renderProjList();renderMemberList();loadConfluencySettings();document.getElementById('dq-results').innerHTML='';}
+  else if(id==='ln2'){renderLN2();}else renderL();}
 
 
 // ── vessel icons for lineage nodes ──
@@ -610,6 +666,8 @@ function lay(roots){const out=[];let gy=28;roots.forEach(root=>{const br=[];cons
 function mks(tag,a){const e=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(a).forEach(([k,v])=>e.setAttribute(k,v));return e;}
 function trn(s,n){return s&&s.length>n?s.slice(0,n-1)+'...':s;}
 
+// load settings on startup
+if(typeof loadConfluencySettings==='function')setTimeout(loadConfluencySettings,200);
 function renderL(){
   const f=document.getElementById('lf').value;
   const fil=f==='all'?passages:passages.filter(p=>p.line===f);
@@ -634,6 +692,27 @@ function renderL(){
     const vlt=mks('text',{x:6,y:41,'font-size':9,fill:'#888','font-family':'system-ui'});vlt.textContent=trn(vl,14);g.appendChild(vlt);
     // discontinued badge
     if(n.action==='discontinued'){const wb=mks('rect',{x:NW-28,y:3,width:22,height:12,rx:3,fill:'#E53935'});g.appendChild(wb);const wt=mks('text',{x:NW-17,y:9,'text-anchor':'middle','dominant-baseline':'central','font-size':9,'font-weight':600,fill:'#fff','font-family':'system-ui'});wt.textContent='✗';g.appendChild(wt);}
+    // mixed well seeding density badge
+    if(n.plateData&&Object.keys(n.plateData).length){
+      var _allSeeds=[];
+      Object.keys(n.plateData).forEach(function(pk){
+        var pd=n.plateData[pk];
+        Object.keys(pd).forEach(function(wid){
+          var w=pd[wid];
+          if(w&&w.occupied&&w.seeding)_allSeeds.push(w.seeding.toString().trim());
+        });
+      });
+      var _uniqueSeeds=_allSeeds.filter(function(v,i,a){return a.indexOf(v)===i;});
+      var _plateSeed=(n.seedingDensity||n.seedingTotal||'').toString().trim();
+      var _hasMixed=_uniqueSeeds.length>1||(_plateSeed&&_uniqueSeeds.length===1&&_uniqueSeeds[0]!==_plateSeed);
+      if(_hasMixed){
+        var msb=mks('rect',{x:4,y:3,width:28,height:12,rx:3,fill:'#D97706'});
+        g.appendChild(msb);
+        var mst=mks('text',{x:18,y:9,'text-anchor':'middle','dominant-baseline':'central','font-size':8,'font-weight':600,fill:'#fff','font-family':'system-ui'});
+        mst.textContent='⚠ seed';
+        g.appendChild(mst);
+      }
+    }
     // broken parent warning badge
     if(n.parent&&!nm[n.parent]&&n.action!=='thaw'&&n.action!=='inherit'&&n.action!=='discontinued'){const wb=mks('rect',{x:NW-28,y:3,width:22,height:12,rx:3,fill:'#E53935'});g.appendChild(wb);const wt=mks('text',{x:NW-17,y:9,'text-anchor':'middle','dominant-baseline':'central','font-size':8,'font-weight':600,fill:'#fff','font-family':'system-ui'});wt.textContent='⚠ ?';g.appendChild(wt);}
     if(n.feeds&&n.feeds.length){
@@ -665,7 +744,7 @@ function showTT(e,n){
     +(vl?'<span>'+vl+'</span><br>':'')
     +(n.project?'<span style="color:var(--blue);font-size:10px">'+n.project+'</span><br>':'')
     +(n.feeds&&n.feeds.length?'<span style="color:#1D9E75">'+n.feeds.length+' feed'+(n.feeds.length!==1?'s':'')+'</span><br>':'')
-    +(n.seedingDensity?'<span style="color:#6B6A65">Seeding: '+n.seedingDensity+'</span><br>':'')
+    +(n.seedingDensity?'<span style="color:#6B6A65">Seeding: '+n.seedingDensity+'</span><br>':'')+(function(){if(!n.plateData||!Object.keys(n.plateData).length)return '';var _s=[];Object.keys(n.plateData).forEach(function(pk){  Object.keys(n.plateData[pk]).forEach(function(wid){    var w=n.plateData[pk][wid];    if(w&&w.occupied&&w.seeding)_s.push(wid+': '+w.seeding);  });});if(!_s.length)return '';var _u=[...new Set(_s.map(function(x){return x.split(': ')[1];}))]; if(_u.length<=1)return '';return '<span style="color:#D97706">⚠ Mixed seeding: '+_s.slice(0,4).join(', ')+(_s.length>4?' …':'')+'</span><br>';})()
     +(function(){var fc=calcFoldChange(n,passages);return fc?'<span style="color:#1D9E75;font-weight:500">×'+fmtFold(fc)+' fold change</span><br>':'';})()
     +(n.splitRatio?'<span style="color:#6B6A65">Split: '+n.splitRatio+'</span><br>':'')
     +'<span style="color:#6B6A65">'+n.condition+'</span><br>'
@@ -1119,19 +1198,23 @@ function openFeedForm(recId){
     +'<div class="fr"><label>Operator</label>'+operatorSelectHTML('')+'</div>'
     +'<div class="fr"><label>Media type</label><input id="ff-media" placeholder="e.g. DMEM 10% FBS" value="'+(rec.condition||'')+'"></div>'
     +'<div class="fr"><label>Volume added (mL)</label><input id="ff-vol" type="number" min="0" step="0.5" placeholder="e.g. 10"></div>'
+    +'<div class="fr"><label>Media cat # <span class="ot">optional</span></label><input id="ff-cat" placeholder="e.g. 11965092" value=""></div>'
+    +'<div class="fr"><label>Lot # <span class="ot">optional</span></label><input id="ff-lot" placeholder="e.g. 2416234" value=""></div>'
+    +'<div class="fr"><label>Expiration date <span class="ot">optional</span></label><input id="ff-exp" type="date"></div>'
     +'</div>'
-    +'<div class="fr"><label>Notes</label><textarea id="ff-note" placeholder="Any observations..."></textarea></div>'
-    +'<div id="ff-opt" style="display:none;margin-top:8px;padding-top:8px;border-top:0.5px dashed var(--bd)">'
-    +'<div class="fg">'
-    +'<div class="fr"><label>Media cat #</label><input id="ff-cat" placeholder="e.g. 11965092"></div>'
-    +'<div class="fr"><label>Lot #</label><input id="ff-lot" placeholder="e.g. 2416234"></div>'
-    +'<div class="fr"><label>Expiration date</label><input id="ff-exp" type="date"></div>'
-    +'</div></div>'
-    +'<div style="margin-top:8px"><span style="font-size:11px;color:var(--blue);cursor:pointer" onclick="var o=document.getElementById(\'ff-opt\');o.style.display=o.style.display===\'none\'?\'block\':\'none\'">+ Media lot / cat# / expiry</span></div>';
+    +'<div class="fr"><label style="display:flex;align-items:center;gap:6px">&#129514; Confluency analysis folder <span style="font-weight:400;font-size:10px;color:var(--tx2)">network path — automated analysis only</span></label><input id="fimgdir" value="'+esc(rec.imageFolder||'')+'" placeholder="e.g. //server/share/'+rec.id+'/" style="font-family:monospace;font-size:11px"></div>'
+    +'<div class="fr"><label>Notes</label><textarea id="ff-note" placeholder="Any observations..."></textarea></div>';
   document.getElementById('mft').innerHTML='<button class="btn" onclick="closeM()">Cancel</button>'
     +'<button class="btn btn-p" data-recid="'+recId+'" onclick="subFeed(this.dataset.recid)">Save feed event</button>';
   document.getElementById('mbg').classList.add('on');
   setTimeout(renderOperatorDropdown,0);
+  setTimeout(function(){
+    const fd=document.getElementById('fimgdir');
+    if(fd&&!fd.value&&window._confBaseFolder){
+      const sep=window._confBaseFolder.endsWith('/')||window._confBaseFolder.endsWith('\\')?'':'/';
+      fd.value=window._confBaseFolder+sep+recId+'/';
+    }
+  },80);
 }
 
 function subFeed(recId){
@@ -1141,6 +1224,7 @@ function subFeed(recId){
   const media=fv('ff-media'),vol=fv('ff-vol');
   if(!media&&!vol){toast('Please enter at least a media type or volume');return;}
   rec.feeds.push({date:fv('ff-date')||tod(),media:media,volumeMl:vol,user:getOperatorValue(),note:fv('ff-note'),mediaCat:fv('ff-cat'),mediaLot:fv('ff-lot'),mediaExp:fv('ff-exp'),addedAt:new Date().toISOString()});
+  if(fv('fimgdir')) rec.imageFolder = fv('fimgdir');
   closeM();renderL();
   toast('Feed event logged on '+recId);
 }
@@ -1330,33 +1414,37 @@ function openF(pid,action){
   if(!isE&&par){body+='<div class="istrip"><div><div class="isl">Parent ID</div><div class="isv">'+par.id+'</div></div><div><div class="isl">Parent</div><div class="isv" style="font-family:inherit;font-size:13px">'+pL(par)+'</div></div><div><div class="isl">Parent date</div><div class="isv" style="font-family:inherit;font-size:12px;color:#0F6E56">'+par.date+'</div></div>'+(pND!==null?'<div><div class="isl">This P#</div><div class="isv" style="font-family:inherit;font-size:13px;color:'+AC[act]+'">P'+pND+'</div></div>':'')+'</div>';}
 
   if(act==='thaw'){
-    body+='<div class="fsec">Culture origin</div><div class="fg">'
+    body+='<div class="fsec">Origin</div><div class="fg">'
       +'<div class="fr"><label>Cell line</label><input id="fl" value="'+esc(d.line||'')+'" placeholder="e.g. HEK293"></div>'
-      +'<div class="fr"><label>Starting passage # <span class="ot">(from vial label)</span></label><input id="fp" type="number" min="0" value="'+(d.passageNum!==undefined?d.passageNum:'')+'" placeholder="e.g. 5" oninput="updTP()"><div id="tp" class="hint" style="display:none"></div></div>'
-      +'<div class="fr"><label>Vial / lot # / source</label><input id="flt" value="'+esc(d.vial||'')+'" placeholder="e.g. ATCC lot 2024-07"></div>'
-      +'<div class="fr"><label>Thaw date</label><input id="fdt" type="date" value="'+esc(d.date||'')+'"></div></div>'
+      +'<div class="fr"><label>Starting passage # <span class="ot">(from vial label)</span></label>'
+      +'<input id="fp" type="number" min="0" value="'+(d.passageNum!==undefined?d.passageNum:'')+
+      '" placeholder="e.g. 5" oninput="updTP()"><div id="tp" class="hint" style="display:none"></div></div>'
+      +'<div class="fr"><label>Vial / lot # / source</label><input id="flt" value="'+esc(d.vial||'')+'" placeholder="e.g. ATCC lot 2024-07, LN2 Tank A Box 2"></div>'
+      +'<div class="fr"><label>Thaw date</label><input id="fdt" type="date" value="'+esc(d.date||'')+'"></div>'
+      +'<div class="fr"><label>Operator</label>'+operatorSelectHTML(d.user||'')+'</div>'
+      +'<div class="fr"><label>Project</label>'+projectSelectHTML(d.project||'')+'</div></div>'
+      +'<div class="fsec" style="margin-bottom:8px">Cell count</div>'
+      +cellCountSection('thaw', d)
       +'<div class="fsec">Culture conditions</div>'
       +'<div class="fg">'
       +'<div class="fr"><label>Vessel</label>'+vesselDropdown(d.wells||'')+'</div>'
-      +'<div class="fr"><label>Medium / condition</label><input id="fc" value="'+esc(d.condition||'')+'" placeholder="e.g. DMEM 10% FBS"></div>'
-      +'<div class="fr"><label>Substrate</label><input id="fsub" value="'+esc(d.substrate||'TC treated')+'"></div>'
-      +'<div class="fr"><label>Operator</label>'+operatorSelectHTML(d.user||'')+'</div>'
-      +'<div class="fr"><label>Project</label>'+projectSelectHTML(d.project||'')+'</div></div>'
-      +'<div id="plate-btn-row" style="margin-bottom:8px">'+(thawVesselIsPlate?'<button class="plate-btn" onclick="openPMThaw(\''+d.id+'\',\''+d.wells+'\')">View / edit plate wells</button>':'')+'</div>'
+      +'<div class="fr"><label>Medium / condition</label><input id="fc" value="'+esc(d.condition||'')+'" placeholder="e.g. mTeSR1, DMEM 10% FBS"></div>'
+      +'<div class="fr"><label>Substrate</label><select id="fsub" style="font-size:13px;padding:7px 9px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%"><option value="TC Treated"'+((!d.substrate||d.substrate==='TC treated'||d.substrate==='TC Treated')?' selected':'')+'>TC Treated</option><option value="Matrigel"'+(d.substrate==='Matrigel'?' selected':'')+'>Matrigel</option><option value="hESC Matrigel"'+(d.substrate==='hESC Matrigel'?' selected':'')+'>hESC Matrigel</option><option value="Vitronectin"'+(d.substrate==='Vitronectin'?' selected':'')+'>Vitronectin</option><option value="Fibronectin"'+(d.substrate==='Fibronectin'?' selected':'')+'>Fibronectin</option><option value="Collagen"'+(d.substrate==='Collagen'?' selected':'')+'>Collagen</option><option value="Laminin"'+(d.substrate==='Laminin'?' selected':'')+'>Laminin</option><option value="None"'+(d.substrate==='None'?' selected':'')+'>None</option></select></div>'
+      +'</div>'
+      +'<div id="plate-btn-row" style="margin-bottom:8px">'+(thawVesselIsPlate?'<button class="plate-btn" onclick="openPMThaw(\''+d.id+'\',\''+d.wells+'\')">⛶ View / edit plate wells</button>':'')+'</div>'
       +'<div class="seed-warn" id="seed-warn-thaw"></div>'
       +'<div id="thaw-seed-row" style="display:'+(thawVesselIsFlask?'block':'none')+';margin-bottom:8px">'
       +'<div class="fg">'
-      +'<div class="fr"><label id="thaw-seed-label" style="font-size:11px;color:var(--tx2)">Cells / cm\u00b2 (optional)</label>'
+      +'<div class="fr"><label id="thaw-seed-label" style="font-size:11px;color:var(--tx2)">Cells / cm² (optional)</label>'
       +seedingInputVal('thaw-seed-density','thaw-seed-density-sci','e.g. 5000',esc(d.seedingDensity||''),'updateThawHint()')
       +'<div id="thaw-seed-hint" class="hint" style="display:none;color:#3B6D11" data-area="'+(FA[d.wells]||'')+'"></div>'
       +'</div>'
       +'<div class="fr"><label style="font-size:11px;color:var(--tx2)">Total cells seeded (optional)</label>'
       +'<div id="thaw-seed-total-wrap">'
-      +seedingInputVal('thaw-seed-total','thaw-seed-total-sci','e.g. 1\u00d710\u2076',esc(d.seedingTotal||''),'checkThawSeedingAlert()')
+      +seedingInputVal('thaw-seed-total','thaw-seed-total-sci','e.g. 1×10⁶',esc(d.seedingTotal||''),'checkThawSeedingAlert()')
       +'</div></div></div></div>'
-      +'<div class="fsec" style="margin-bottom:8px">Cell count</div>'
-      +cellCountSection('thaw', d)
-      +'<div class="fr"><label>Notes</label><textarea id="fn" placeholder="Viability %, recovery observations...">'+esc(d.note||'')+'</textarea></div>';
+      +'<div class="fr"><label>Notes</label><textarea id="fn" placeholder="Recovery observations, viability from hemocytometer, any issues...">'+esc(d.note||'')+'</textarea></div>';
+  } else if(act==='inherit'){
   } else if(act==='inherit'){
     body+='<div class="fsec">Source and history</div><div class="fg">'
       +'<div class="fr"><label>Cell line</label><input id="fl" value="'+esc(d.line||'')+'" placeholder="e.g. iPSC"></div>'
@@ -1383,6 +1471,7 @@ function openF(pid,action){
       +'<div id="thaw-seed-total-wrap">'
       +seedingInputVal('thaw-seed-total','thaw-seed-total-sci','e.g. 1\u00d710\u2076',esc(d.seedingTotal||''),'checkThawSeedingAlert()')
       +'</div></div></div></div>'
++'<div class="fr"><label style="display:flex;align-items:center;gap:6px">&#129514; Confluency analysis folder <span style="font-weight:400;font-size:10px;color:var(--tx2)">network path — used for automated confluency analysis only</span></label><input id="fimgdir" value="'+esc(d.imageFolder||'')+'" placeholder="e.g. //server/share/'+((d.expId||d.id)||'EXP-001')+'/" style="font-family:monospace;font-size:11px"></div><div style="font-size:10px;color:var(--tx2);margin-top:2px;margin-bottom:6px">&#9432; Used only for automated confluency analysis via the ⚪ Analyze confluency button in the plate viewer. Not for image thumbnails or reports.</div>'
       +'<div class="fr"><label>Notes</label><textarea id="fn" placeholder="Authentication, mycoplasma, STR profile...">'+esc(d.note||'')+'</textarea></div>';
   } else if(act==='passage'){
     if(isE&&d.vessels&&d.vessels.length){d.vessels.forEach(v=>VL.push({id:v.id||('v'+Date.now()+Math.random().toString(36).slice(2,5)),type:v.type,qty:v.qty||1,seeding:v.seeding||'',seedingTotal:v.seedingTotal||'',custom:'',cond:v.cond||'',treat:v.treat||''}));}
@@ -1403,36 +1492,52 @@ function openF(pid,action){
       +'<div class="seed-warn" id="seed-warn-pass"></div>'
       +'<div class="fsec" style="margin-top:14px">Conditions</div>'
       +'<div class="fr"><label>Medium / condition</label><input id="fc" value="'+esc(d.condition||(par?par.condition:''))+'" placeholder="e.g. DMEM 10% FBS"></div>'
++'<div class="fr"><label style="display:flex;align-items:center;gap:6px">&#129514; Confluency analysis folder <span style="font-weight:400;font-size:10px;color:var(--tx2)">network path — used for automated confluency analysis only</span></label><input id="fimgdir" value="'+esc(d.imageFolder||'')+'" placeholder="e.g. //server/share/'+((d.expId||d.id)||'EXP-001')+'/" style="font-family:monospace;font-size:11px"></div><div style="font-size:10px;color:var(--tx2);margin-top:2px;margin-bottom:6px">&#9432; Used only for automated confluency analysis via the ⚪ Analyze confluency button in the plate viewer. Not for image thumbnails or reports.</div>'
       +'<div class="fr"><label>Notes</label><textarea id="fn" placeholder="Morphology, viability, any issues...">'+esc(d.note||'')+'</textarea></div>';
   } else if(act==='freeze'){
+    const frzBatches=(isE&&d.batches&&d.batches.length)?d.batches:[{id:'b0',vials:d.vials||'',cellsPerVial:d.cellsPerVial||'',cryo:d.cryo||'10% DMSO in FBS',storage:d.storage||'',notes:''}];
     body+='<div class="fsec">Freeze details</div><div class="fg">'
       +'<div class="fr"><label>Freeze date</label><input id="fdt" type="date" value="'+esc(d.date||'')+'" oninput="onDC()"></div>'
       +dR(d.days)
-      +'<div class="fr"><label>Number of vials</label><input id="fvi" type="number" value="'+esc(d.vials||'')+'" placeholder="e.g. 4"></div>'
-      +'<div class="fr"><label>Cells per vial</label><input id="fcv" value="'+esc(d.cellsPerVial||'')+'" placeholder="e.g. 1\u00d710\u2076"></div>'
-      +'<div class="fr"><label>Cryoprotectant</label><input id="fcr" value="'+esc(d.cryo||'10% DMSO in FBS')+'"></div>'
-      +'<div class="fr"><label>Storage location</label><input id="fst" value="'+esc(d.storage||'')+'" placeholder="e.g. LN2 tank A box 2"></div>'
       +'<div class="fr"><label>Viability %</label><input id="fvb" type="number" value="'+esc(d.viability||'')+'" placeholder="e.g. 90"></div>'
-      +'<div class="fr"><label>Operator</label>'+operatorSelectHTML(d.user||'')+'</div></div>'
-      +'<div class="fsec" style="margin-bottom:8px">Cell count</div>'
-      +cellCountSection('frz', d)
+      +'</div>'
+      +'<div class="fr"><label>Operator</label>'+operatorSelectHTML(d.user||'')+'</div>'
+      +'<div class="fsec" style="display:flex;align-items:center;justify-content:space-between"><span>Vial batches</span><button class="plate-btn" onclick="addFrzBatch()">+ Add batch</button></div>'
+      +'<div id="frz-batches" style="margin-bottom:10px"></div>'
++'<div class="fr"><label style="display:flex;align-items:center;gap:6px">&#129514; Confluency analysis folder <span style="font-weight:400;font-size:10px;color:var(--tx2)">network path — used for automated confluency analysis only</span></label><input id="fimgdir" value="'+esc(d.imageFolder||'')+'" placeholder="e.g. //server/share/'+((d.expId||d.id)||'EXP-001')+'/" style="font-family:monospace;font-size:11px"></div><div style="font-size:10px;color:var(--tx2);margin-top:2px;margin-bottom:6px">&#9432; Used only for automated confluency analysis via the ⚪ Analyze confluency button in the plate viewer. Not for image thumbnails or reports.</div>'
+      +'<div class="fr"><label>Notes</label><textarea id="fn" placeholder="Reason for freeze, any notes...">'+esc(d.note||'')+'</textarea></div>';
+    setTimeout(function(){renderFrzBatches(frzBatches);},0);
+    body += '<div class="fsec" style="margin-bottom:8px">Cell count</div>'
+      + cellCountSection('frz', d);
++'<div class="fr"><label style="display:flex;align-items:center;gap:6px">&#129514; Confluency analysis folder <span style="font-weight:400;font-size:10px;color:var(--tx2)">network path — used for automated confluency analysis only</span></label><input id="fimgdir" value="'+esc(d.imageFolder||'')+'" placeholder="e.g. //server/share/'+((d.expId||d.id)||'EXP-001')+'/" style="font-family:monospace;font-size:11px"></div><div style="font-size:10px;color:var(--tx2);margin-top:2px;margin-bottom:6px">&#9432; Used only for automated confluency analysis via the ⚪ Analyze confluency button in the plate viewer. Not for image thumbnails or reports.</div>'
       +'<div class="fr"><label>Notes</label><textarea id="fn" placeholder="Reason for freeze, any notes...">'+esc(d.note||'')+'</textarea></div>';
   } else if(act==='experiment'){
-    const expVesselIsPlate=isE&&d.wells&&PLATES.some(p=>d.wells===p);
-    body+='<div class="fsec" style="display:flex;align-items:center;justify-content:space-between"><span>Experiment</span>'+(isE?'<button class="plate-btn" onclick="duplicateExperimentAsTimepoint()" style="font-size:11px">&#9633; Duplicate as new timepoint</button>':'')+'</div><div class="fg">';
+    if(isE&&d.vessels&&d.vessels.length){d.vessels.forEach(v=>VL.push({id:v.id||('v'+Date.now()+Math.random().toString(36).slice(2,5)),type:v.type,qty:v.qty||1,seeding:v.seeding||'',seedingTotal:v.seedingTotal||'',custom:'',cond:v.cond||'',treat:v.treat||''}));}
+    body+='<div class="fsec" style="display:flex;align-items:center;justify-content:space-between"><span>Experiment details</span>'+(isE?'<button class="plate-btn" onclick="duplicateExperimentAsTimepoint()" style="font-size:11px">&#9633; Duplicate as new timepoint</button><button class="plate-btn" onclick="generateExpReport()" style="font-size:11px;margin-left:6px;border-color:#854F0B;color:#854F0B">&#8659; Report (.pptx)</button>':'')+'</div>'
+      +'<div class="fg">'
       +'<div class="fr"><label>Experiment ID</label><input id="fei" value="'+esc(d.expId||'')+'" placeholder="e.g. EXP-001"></div>'
+      +'<div class="fr"><label>Assay type</label><select id="fas" style="font-size:13px;padding:7px 9px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%">'+['Drug screen','Flow cytometry','ICC/IF','Western blot','qPCR','RNA-seq','Differentiation','CRISPR','Other'].map(function(a){return '<option'+(d.assay===a?' selected':'')+'>'+a+'</option>';}).join('')+'</select></div>'
+      +'<div class="fr"><label>Treatment / condition</label><input id="ftr" value="'+esc(d.treatment||'')+'" placeholder="e.g. Compound library 10uM"></div>'
+      +'<div class="fr"><label>Timepoints</label><input id="ftp2" value="'+esc(d.timepoints||'')+'" placeholder="e.g. 24h, 48h, 72h"></div>'
       +'<div class="fr"><label>Start date</label><input id="fdt" type="date" value="'+esc(d.date||'')+'" oninput="onDC()"></div>'
       +dR(d.days)
-      +'<div class="fr"><label>Assay type</label><select id="fas">'+['Drug screen','Flow cytometry','ICC/IF','Western blot','qPCR','RNA-seq','Differentiation','CRISPR','Other'].map(a=>'<option'+(d.assay===a?' selected':'')+'>'+a+'</option>').join('')+'</select></div>'
-      +'<div class="fr"><label>Treatment / condition</label><input id="ftr" value="'+esc(d.treatment||'')+'" placeholder="e.g. Compound library 10uM"></div>'
-      +'<div class="fr"><label>Timepoints</label><input id="ftp2" value="'+esc(d.timepoints||'')+'" placeholder="e.g. 24h, 48h, 72h"></div></div>'
-      +'<div class="fsec">Vessel</div>'
-      +vesselDropdown(d.wells||(par?par.wells||'':''))
-      +'<div id="plate-btn-row" style="margin-top:6px;margin-bottom:8px">'+(expVesselIsPlate?'<button class="plate-btn" onclick="openPMExp(\''+d.wells+'\')">View plate wells</button>':'')+'</div>'
+      +'<div class="fr"><label>Split ratio <span class="ot">optional</span></label><input id="fsp" value="'+esc(d.splitRatio||'')+'" placeholder="e.g. 1:3"></div>'
+      +'<div class="fr"><label>Confluency at split % <span class="ot">optional</span></label><input id="fco" type="number" value="'+esc(d.confluency||'')+'" placeholder="e.g. 80"></div>'
+      +'<div class="fr"><label>Operator</label>'+operatorSelectHTML(d.user||'')+'</div>'
+      +'</div>'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><input type="checkbox" id="exp-inc-p" style="width:14px;height:14px;cursor:pointer" checked><label for="exp-inc-p" style="font-size:12px;cursor:pointer">Increment passage number (P'+(par?par.passageNum:0)+' → P'+(par?par.passageNum+1:1)+')</label></div>'
       +'<div class="fsec" style="margin-bottom:8px">Cell count</div>'
       +cellCountSection('exp', d)
-      +'<div class="fr"><label>Operator</label>'+operatorSelectHTML(d.user||'')+'</div>'
-      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><input type="checkbox" id="exp-inc-p" style="width:14px;height:14px;cursor:pointer" checked'+'>  <label for="exp-inc-p" style="font-size:12px;cursor:pointer">Increment passage number (P'+(par?par.passageNum:0)+' → P'+(par?par.passageNum+1:1)+')</label></div>'
+      +'<div class="fsec">Destination vessels</div>'
+      +'<div style="font-size:11px;color:#6B6A65;margin-bottom:10px">Add one row per vessel type. Enter seeding density to auto-calculate total cells seeded.</div>'
+      +'<div class="vcards" id="vcards"></div>'
+      +'<button class="avbtn" onclick="addV()"><span style="font-size:18px;line-height:1">+</span> Add vessel type</button>'
+      +'<div class="vsum" id="vsum"></div>'
+      +'<div class="seed-warn" id="seed-warn-exp"></div>'
+      +'<div class="fsec" style="margin-top:14px">Conditions</div>'
+      +'<div class="fr"><label>Medium / condition</label><input id="fc" value="'+esc(d.condition||(par?par.condition:''))+'" placeholder="e.g. DMEM 10% FBS"></div>'
+      +'<div class="fr"><label>Substrate</label><select id="fsub" style="font-size:13px;padding:7px 9px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%"><option value="TC Treated"'+((!d.substrate||d.substrate==='TC treated'||d.substrate==='TC Treated')?' selected':'')+'>TC Treated</option><option value="Matrigel"'+(d.substrate==='Matrigel'?' selected':'')+'>Matrigel</option><option value="hESC Matrigel"'+(d.substrate==='hESC Matrigel'?' selected':'')+'>hESC Matrigel</option><option value="Vitronectin"'+(d.substrate==='Vitronectin'?' selected':'')+'>Vitronectin</option><option value="Fibronectin"'+(d.substrate==='Fibronectin'?' selected':'')+'>Fibronectin</option><option value="Collagen"'+(d.substrate==='Collagen'?' selected':'')+'>Collagen</option><option value="Laminin"'+(d.substrate==='Laminin'?' selected':'')+'>Laminin</option><option value="None"'+(d.substrate==='None'?' selected':'')+'>None</option></select></div>'
+      +'<div class="fr"><label style="display:flex;align-items:center;gap:6px">&#129514; Confluency analysis folder <span style="font-weight:400;font-size:10px;color:var(--tx2)">network path — automated analysis only</span></label><input id="fimgdir" value="'+esc(d.imageFolder||'')+'" placeholder="e.g. //server/share/'+esc(d.expId||d.id||'EXP-001')+'/" style="font-family:monospace;font-size:11px"></div>'
       +'<div class="fr"><label>Hypothesis / goal</label><textarea id="fn" placeholder="What are you testing?">'+esc(d.note||'')+'</textarea></div>';
   }
 
@@ -1440,7 +1545,7 @@ function openF(pid,action){
   if(isE){
     body += '<div class="fsec" style="margin-top:14px">Feed log</div>';
     body += '<div id="feed-wrap-'+en.id+'">'+renderFeedSection(en.id)+'</div>';
-    body += '<div class="fsec" style="margin-top:14px">Images</div>';
+    body += '<div class="fsec" style="margin-top:14px">Microscope images</div>' + '<div style="font-size:11px;color:var(--tx2);margin-bottom:8px;margin-top:2px">Attach images here — shown as thumbnails in the record and included in the PowerPoint report.</div>';
     body += '<div id="img-wrap-rec">'+renderImgSection(en.id,null)+'</div>';
   }
   document.getElementById('mbd').innerHTML=body;
@@ -1448,8 +1553,16 @@ function openF(pid,action){
   document.getElementById('mbg').classList.add('on');
   setTimeout(renderProjectDropdown,0);
   setTimeout(renderOperatorDropdown,50);
+  setTimeout(function(){
+    const fd=document.getElementById('fimgdir');
+    if(fd&&!fd.value&&window._confBaseFolder){
+      const sep=window._confBaseFolder.endsWith('/')||window._confBaseFolder.endsWith('\\')?'':'/';
+      const id=(MS.editId||(en&&en.expId)||(en&&en.id)||'');
+      if(id)fd.value=window._confBaseFolder+sep+id+'/';
+    }
+  },80);
   setTimeout(function(){const os=document.getElementById('f-operator');if(os&&labMembers.length===0)os.style.display='none';},0);
-  if(act==='passage'){setTimeout(function(){renderVL();if(!isE)addV();},0);}
+  if(act==='passage'||act==='experiment'){setTimeout(function(){renderVL();if(!isE)addV();},0);}
   if(act==='thaw'||act==='inherit'){setTimeout(updTP,50);setTimeout(onVesselChange,80);}
   if(isE&&par&&d.date)setTimeout(onDC,60);
 }
@@ -1473,17 +1586,17 @@ function subF(){
   if(ms.mode==='edit'){
     const n=passages.find(p=>p.id===ms.editId);if(!n){closeM();return;}
     const act=n.action;
-    n.date=fv('fdt')||n.date;n.days=fi('fd');n.user=getOperatorValue()||n.user;n.note=fv('fn')||n.note;
+    n.date=fv('fdt')||n.date;n.days=fi('fd');n.user=getOperatorValue()||n.user;n.note=fv('fn')||n.note;n.imageFolder=fv('fimgdir')||n.imageFolder;
     if(act==='thaw'||act==='inherit'){if(act==='thaw')Object.assign(n,getCCData('thaw'));n.wells=getThawWells();n.condition=fv('fc');n.substrate=fv('fsub');n.project=fv('f-project');n.seedingDensity=fv('thaw-seed-density');n.seedingTotal=fv('thaw-seed-total');n.seedingUnit=n.wells==='Spinner flask'?'cells/mL':'cells/cm\u00b2';}
     if(act==='passage'){Object.assign(n,getCCData('pass'));const fil=VL.filter(v=>v.type&&v.type!=='');if(fil.length){n.vessels=fil.map(v=>({id:v.id,type:v.type==='Custom...'?(v.custom||'Custom'):v.type,vesselClass:isPlate(v.type)?'plate':'flask',qty:v.qty,seeding:v.seeding||null,seedingTotal:v.seedingTotal||null,seedingUnit:v.type==='Spinner flask'?'cells/mL':'cells/cm\u00b2',cond:v.cond||'',treat:v.treat||''}));n.wells=fil.map(v=>'('+v.qty+') '+(v.type==='Custom...'?(v.custom||'Custom'):v.type)).join(', ');}n.condition=fv('fc');n.substrate=fv('fsub');n.splitRatio=fv('fsp');n.confluency=fv('fco');}
-    if(act==='freeze'){Object.assign(n,getCCData('frz'));n.vials=fv('fvi');n.cellsPerVial=fv('fcv');n.cryo=fv('fcr');n.storage=fv('fst');n.viability=fv('fvb');}
-    if(act==='experiment'){Object.assign(n,getCCData('exp'));const incPe=document.getElementById('exp-inc-p');if(incPe){const parRec=passages.find(function(p){return p.id===n.parent;});n.passageNum=(incPe.checked&&parRec)?(parRec.passageNum+1):(parRec?parRec.passageNum:n.passageNum);}n.expId=fv('fei');n.assay=fv('fas');n.treatment=fv('ftr');n.timepoints=fv('ftp2');n.wells=getThawWells();}
+    if(act==='freeze'){Object.assign(n,getCCData('frz'));n.passageNum=(par?par.passageNum+1:n.passageNum);n.batches=getFrzBatches();n.vials=n.batches.reduce(function(s,b){return s+(parseInt(b.vials)||0);},0);n.viability=fv('fvb');}
+    if(act==='experiment'){Object.assign(n,getCCData('exp'));const incPe=document.getElementById('exp-inc-p');if(incPe){const parRec=passages.find(function(p){return p.id===n.parent;});n.passageNum=(incPe.checked&&parRec)?(parRec.passageNum+1):(parRec?parRec.passageNum:n.passageNum);}n.expId=fv('fei');n.assay=fv('fas');n.treatment=fv('ftr');n.timepoints=fv('ftp2');n.splitRatio=fv('fsp');n.confluency=fv('fco');n.condition=fv('fc');n.substrate=fv('fsub');const efil=VL.filter(v=>v.type&&v.type!=='');if(efil.length){n.vessels=efil.map(v=>({id:v.id,type:v.type==='Custom...'?(v.custom||'Custom'):v.type,vesselClass:isPlate(v.type)?'plate':'flask',qty:v.qty,seeding:v.seeding||null,seedingTotal:v.seedingTotal||null,seedingUnit:v.type==='Spinner flask'?'cells/mL':'cells/cm²',cond:v.cond||'',treat:v.treat||''}));n.wells=efil.map(v=>'('+v.qty+') '+(v.type==='Custom...'?(v.custom||'Custom'):v.type)).join(', ');}else n.wells=getThawWells();}
     closeM();renderL();toast('Record updated');return;
   }
   const line=fv('fl')||(par?par.line:'UNK');
   const nid=ms._tempId||gId(line,ms.action);
   const pn=(ms.action==='thaw'||ms.action==='inherit')?parseInt(fv('fp'))||0:cP(ms.parentId,ms.action)||0;
-  const rec={id:nid,parent:ms.parentId||null,line,action:ms.action,passageNum:pn,date:fv('fdt')||tod(),days:fi('fd'),condition:fv('fc')||(par?par.condition:''),note:fv('fn'),user:getOperatorValue(),substrate:fv('fsub')};
+  const rec={id:nid,parent:ms.parentId||null,line,action:ms.action,passageNum:pn,date:fv('fdt')||tod(),days:fi('fd'),condition:fv('fc')||(par?par.condition:''),note:fv('fn'),user:getOperatorValue(),substrate:fv('fsub')};rec.imageFolder=fv('fimgdir')||'';
   if(ms.action==='thaw'){
     Object.assign(rec,getCCData('thaw'));rec.project=fv('f-project');rec.vial=fv('flt');rec.wells=getThawWells();
     rec.seedingDensity=fv('thaw-seed-density');
@@ -1520,7 +1633,7 @@ function subF(){
   if(ms.action==='passage'){Object.assign(rec,getCCData('pass'));const fil=VL.filter(v=>v.type&&v.type!=='');if(!fil.length){alert('Please add at least one destination vessel.');return;}rec.vessels=fil.map(v=>({id:v.id,type:v.type==='Custom...'?(v.custom||'Custom'):v.type,vesselClass:isPlate(v.type)?'plate':'flask',qty:v.qty,seeding:v.seeding||null,seedingTotal:v.seedingTotal||null,seedingUnit:v.type==='Spinner flask'?'cells/mL':'cells/cm\u00b2',cond:v.cond||'',treat:v.treat||''}));rec.wells=fil.map(v=>'('+v.qty+') '+(v.type==='Custom...'?(v.custom||'Custom'):v.type)).join(', ');rec.splitRatio=fv('fsp');rec.confluency=fv('fco');}
     if(MS._stub&&MS._stub.plateData&&Object.keys(MS._stub.plateData).length){rec.plateData=MS._stub.plateData;}
     else if(PM.vesselKey&&PM.allIds.length){const dp={};PM.allIds.forEach(function(id){if(PM.wells[id]&&(PM.wells[id].occupied||PM.wells[id].contaminated))dp[id]=PM.wells[id];});if(Object.keys(dp).length){rec.plateData={};rec.plateData[PM.vesselKey]=dp;}}
-  if(ms.action==='freeze'){Object.assign(rec,getCCData('frz'));rec.passageNum=(par?par.passageNum+1:rec.passageNum);rec.vials=fv('fvi');rec.cellsPerVial=fv('fcv');rec.cryo=fv('fcr');rec.storage=fv('fst');rec.viability=fv('fvb');}
+  if(ms.action==='freeze'){Object.assign(rec,getCCData('frz'));rec.passageNum=(par?par.passageNum+1:rec.passageNum);rec.batches=getFrzBatches();rec.vials=rec.batches.reduce(function(s,b){return s+(parseInt(b.vials)||0);},0);rec.viability=fv('fvb');}
   if(ms.action==='experiment'){
     Object.assign(rec,getCCData('exp'));
     const incP=document.getElementById('exp-inc-p');
@@ -1563,7 +1676,8 @@ function renderOV(){
   let h='<div style="font-size:13px;font-weight:500;margin:4px 0 8px">By cell line</div>';
   lines.forEach(line=>{const lp=passages.filter(p=>p.line===line);const ld=lp.filter(p=>p.days>0),la=ld.length?(ld.reduce((s,p)=>s+p.days,0)/ld.length).toFixed(1):'--';const mxP=Math.max(...lp.map(p=>p.passageNum||0));const fcs=lp.map(function(n){return calcFoldChange(n,passages);}).filter(function(f){return f!==null;});
     const avgFc=fcs.length?(fcs.reduce(function(a,b){return a+b;},0)/fcs.length):null;
-    h+='<div style="background:'+lc(line,true)+';border-radius:6px;padding:10px 12px;margin-bottom:10px"><div style="font-size:13px;font-weight:500;color:'+lc(line,false)+';margin-bottom:6px">'+line       +' <span style="font-size:11px;font-weight:400;color:#6B6A65">max P'+mxP+' avg '+la+'d/passage '+lp.length+' records'       +(avgFc?' · avg fold change: '+fmtFold(avgFc):'')       +'</span></div>'+lp.map(n=>{const vl=vLbl(n);return'<div style="display:flex;gap:8px;align-items:center;font-size:11px;padding:3px 0;border-bottom:0.5px solid rgba(0,0,0,0.06)"><span class="mono" style="color:'+AC[n.action]+';min-width:110px">'+n.id+'</span><span style="min-width:50px;font-weight:500">'+pL(n)+'</span><span style="min-width:24px;color:'+(n.days>0?'#3B6D11':'#6B6A65')+'">'+n.days+'d</span>'+(n.splitRatio?'<span style="color:#6B6A65">split '+n.splitRatio+'</span>':'')+(vl?'<span style="color:#6B6A65;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+vl+'</span>':'')+'<span style="color:#6B6A65;flex-shrink:0;margin-left:auto">'+n.date+'</span></div>';}).join('')+'</div>';});
+    const gc=drawGrowthCurve(line);
+    h+='<div style="background:'+lc(line,true)+';border-radius:6px;padding:10px 12px;margin-bottom:10px"><div style="font-size:13px;font-weight:500;color:'+lc(line,false)+';margin-bottom:6px">'+line       +' <span style="font-size:11px;font-weight:400;color:#6B6A65">max P'+mxP+' avg '+la+'d/passage '+lp.length+' records'       +(avgFc?' · avg fold change: '+fmtFold(avgFc):'')       +'</span></div>'+(gc?'<div style="margin-bottom:8px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><span style="font-size:11px;font-weight:500;color:'+lc(line,false)+'">Growth curve</span><span style="display:flex;gap:6px"><button class="plate-btn" onclick="downloadGC(\''+line+'\')">↓ PNG</button><button class="plate-btn" onclick="copyGC(\''+line+'\')">⊟ Copy</button></span></div><div id="gc-svg-'+line+'">'+gc+'</div></div>':'')+'<div>'+lp.map(n=>{const vl=vLbl(n);return'<div style="display:flex;gap:8px;align-items:center;font-size:11px;padding:3px 0;border-bottom:0.5px solid rgba(0,0,0,0.06)"><span class="mono" style="color:'+AC[n.action]+';min-width:110px">'+n.id+'</span><span style="min-width:50px;font-weight:500">'+pL(n)+'</span><span style="min-width:24px;color:'+(n.days>0?'#3B6D11':'#6B6A65')+'">'+n.days+'d</span>'+(n.splitRatio?'<span style="color:#6B6A65">split '+n.splitRatio+'</span>':'')+(vl?'<span style="color:#6B6A65;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+vl+'</span>':'')+'<span style="color:#6B6A65;flex-shrink:0;margin-left:auto">'+n.date+'</span></div>';}).join('')+'</div></div>';});
   document.getElementById('gs').innerHTML=h;
 }
 
@@ -2802,6 +2916,594 @@ function attachWellEditorListeners(){
     if(!el)return;
     el.removeEventListener('input',pAutoSave);
     el.addEventListener('input',pAutoSave);
+  });
+}
+
+
+// ── Freeze batch management ──────────────────────────────────────────────────
+var FRZ_BATCHES = [];
+
+function renderFrzBatches(batches) {
+  FRZ_BATCHES = batches ? JSON.parse(JSON.stringify(batches)) : [{id:'b0',vials:'',cellsPerVial:'',cryo:'10% DMSO in FBS',storage:'',notes:''}];
+  const el = document.getElementById('frz-batches');
+  if(!el) return;
+  el.innerHTML = FRZ_BATCHES.map(function(b, idx) {
+    return '<div style="border:0.5px solid var(--bd);border-radius:var(--rl2);padding:10px;margin-bottom:8px;background:var(--bg2)">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+      + '<span style="font-size:11px;font-weight:500;color:var(--tx2)">BATCH ' + (idx+1) + '</span>'
+      + (FRZ_BATCHES.length>1 ? '<button onclick="remFrzBatch('+idx+')" style="background:none;border:none;cursor:pointer;color:var(--tx2);font-size:16px;padding:0">&times;</button>' : '')
+      + '</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+      + '<div class="fr" style="margin-bottom:0"><label style="font-size:11px;color:var(--tx2)">Vials</label>'
+      + '<input type="number" min="1" value="'+esc(b.vials||'')+'" placeholder="e.g. 4" oninput="FRZ_BATCHES['+idx+'].vials=this.value" style="font-size:12px;padding:5px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg);color:var(--tx);font-family:inherit;width:100%"></div>'
+      + '<div class="fr" style="margin-bottom:0"><label style="font-size:11px;color:var(--tx2)">Cells/vial</label>'
+      + '<input type="text" value="'+esc(b.cellsPerVial||'')+'" placeholder="e.g. 1×10⁶" oninput="FRZ_BATCHES['+idx+'].cellsPerVial=this.value" style="font-size:12px;padding:5px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg);color:var(--tx);font-family:inherit;width:100%"></div>'
+      + '<div class="fr" style="margin-bottom:0"><label style="font-size:11px;color:var(--tx2)">Cryoprotectant</label>'
+      + '<input type="text" value="'+esc(b.cryo||'10% DMSO in FBS')+'" oninput="FRZ_BATCHES['+idx+'].cryo=this.value" style="font-size:12px;padding:5px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg);color:var(--tx);font-family:inherit;width:100%"></div>'
+      + '<div class="fr" style="margin-bottom:0"><label style="font-size:11px;color:var(--tx2)">Storage location</label>'
+      + '<input type="text" value="'+esc(b.storage||'')+'" placeholder="e.g. LN2 Tank A Rack 2 Box 3" oninput="FRZ_BATCHES['+idx+'].storage=this.value" style="font-size:12px;padding:5px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg);color:var(--tx);font-family:inherit;width:100%"></div>'
+      + '</div>'
+      + '<div class="fr" style="margin-top:6px;margin-bottom:0"><label style="font-size:11px;color:var(--tx2)">Batch notes</label>'
+      + '<input type="text" value="'+esc(b.notes||'')+'" placeholder="Optional" oninput="FRZ_BATCHES['+idx+'].notes=this.value" style="font-size:12px;padding:5px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg);color:var(--tx);font-family:inherit;width:100%"></div>'
+      + '</div>';
+  }).join('');
+}
+
+function addFrzBatch() {
+  FRZ_BATCHES.push({id:'b'+Date.now(),vials:'',cellsPerVial:FRZ_BATCHES.length?FRZ_BATCHES[FRZ_BATCHES.length-1].cellsPerVial:'',cryo:FRZ_BATCHES.length?FRZ_BATCHES[FRZ_BATCHES.length-1].cryo:'10% DMSO in FBS',storage:'',notes:''});
+  renderFrzBatches(FRZ_BATCHES);
+}
+
+function remFrzBatch(idx) {
+  FRZ_BATCHES.splice(idx, 1);
+  renderFrzBatches(FRZ_BATCHES);
+}
+
+function getFrzBatches() {
+  return JSON.parse(JSON.stringify(FRZ_BATCHES));
+}
+
+// ── LN2 Inventory ────────────────────────────────────────────────────────────
+function renderLN2() {
+  const filter = document.getElementById('ln2-filter');
+  const showDepleted = document.getElementById('ln2-show-depleted');
+  const body = document.getElementById('ln2-body');
+  if(!body) return;
+
+  // rebuild filter dropdown
+  const lines = ['all', ...new Set(passages.filter(p=>p.action==='freeze').map(p=>p.line))];
+  if(filter) {
+    const cur = filter.value;
+    filter.innerHTML = lines.map(l=>'<option value="'+l+'">'+(l==='all'?'All lines':l)+'</option>').join('');
+    filter.value = lines.includes(cur) ? cur : 'all';
+  }
+
+  const selLine = filter ? filter.value : 'all';
+  const showDep = showDepleted ? showDepleted.checked : false;
+
+  // get all freeze records
+  let freezes = passages.filter(function(p){ return p.action==='freeze'; });
+  if(selLine !== 'all') freezes = freezes.filter(function(p){ return p.line===selLine; });
+
+  // for each freeze, calculate vials used (thaws that reference it)
+  function vialsUsed(freezeId) {
+    return passages.filter(function(p){
+      return p.action==='thaw' && (p.parent===freezeId || (p.vial&&p.vial.includes(freezeId)));
+    }).length;
+  }
+
+  if(!freezes.length) {
+    body.innerHTML = '<div style="font-size:13px;color:var(--tx2);padding:20px 0">No freeze records yet. Create a freeze from any lineage node.</div>';
+    return;
+  }
+
+  let html = '';
+  // group by line
+  const lineGroups = {};
+  freezes.forEach(function(f){ if(!lineGroups[f.line])lineGroups[f.line]=[];lineGroups[f.line].push(f); });
+
+  Object.keys(lineGroups).forEach(function(line) {
+    const recs = lineGroups[line];
+    html += '<div style="margin-bottom:20px">';
+    html += '<div style="font-size:13px;font-weight:500;color:'+lc(line,false)+';margin-bottom:8px;padding-bottom:4px;border-bottom:1.5px solid '+lc(line,false)+'">'+line+'</div>';
+
+    recs.forEach(function(f) {
+      const batches = f.batches || [{vials:f.vials,cellsPerVial:f.cellsPerVial,cryo:f.cryo,storage:f.storage,notes:''}];
+      const totalVials = batches.reduce(function(s,b){return s+(parseInt(b.vials)||0);},0);
+      const used = vialsUsed(f.id);
+      const remaining = Math.max(0, totalVials - used);
+      const depleted = remaining === 0;
+
+      if(depleted && !showDep) return;
+
+      html += '<div style="border:0.5px solid var(--bd);border-radius:var(--rl2);padding:12px;margin-bottom:8px;background:'+(depleted?'var(--bg2)':'var(--bg)')+'opacity:'+(depleted?0.6:1)+'">';
+      html += '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px">';
+      html += '<div>';
+      html += '<span style="font-family:monospace;font-size:11px;color:'+AC['freeze']+'">'+f.id+'</span>';
+      html += ' <span style="font-size:11px;color:var(--tx2)">P'+f.passageNum+' • '+f.date+'</span>';
+      html += '</div>';
+      html += '<div style="display:flex;align-items:center;gap:8px">';
+      html += '<span style="font-size:13px;font-weight:600;color:'+(depleted?'var(--tx2)':remaining<=2?'#A32D2D':'#0F6E56')+'">'+remaining+' / '+totalVials+' vials</span>';
+      if(depleted) html += '<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:var(--bg2);color:var(--tx2);border:0.5px solid var(--bd2)">Depleted</span>';
+      html += '</div></div>';
+
+      // batch table
+      if(batches.length > 0) {
+        html += '<table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:8px">';
+        html += '<thead><tr style="background:var(--bg2)">';
+        ['Batch','Vials','Cells/vial','Cryo','Location','Notes'].forEach(function(h){
+          html += '<th style="text-align:left;padding:4px 8px;font-weight:500;color:var(--tx2);border-bottom:0.5px solid var(--bd)">' + h + '</th>';
+        });
+        html += '</tr></thead><tbody>';
+        batches.forEach(function(b, idx) {
+          html += '<tr>';
+          html += '<td style="padding:4px 8px;border-bottom:0.5px solid var(--bd)">' + (idx+1) + '</td>';
+          html += '<td style="padding:4px 8px;border-bottom:0.5px solid var(--bd);font-weight:500">' + (b.vials||'—') + '</td>';
+          html += '<td style="padding:4px 8px;border-bottom:0.5px solid var(--bd)">' + (b.cellsPerVial||'—') + '</td>';
+          html += '<td style="padding:4px 8px;border-bottom:0.5px solid var(--bd)">' + (b.cryo||'—') + '</td>';
+          html += '<td style="padding:4px 8px;border-bottom:0.5px solid var(--bd)">' + (b.storage||'—') + '</td>';
+          html += '<td style="padding:4px 8px;border-bottom:0.5px solid var(--bd);color:var(--tx2)">' + (b.notes||'') + '</td>';
+          html += '</tr>';
+        });
+        html += '</tbody></table>';
+      }
+
+      // thaw events that used this freeze
+      const thaws = passages.filter(function(p){
+        return p.action==='thaw' && (p.parent===f.id || (p.vial&&p.vial.includes(f.id)));
+      });
+      if(thaws.length) {
+        html += '<div style="font-size:11px;color:var(--tx2);margin-top:4px">';
+        html += '<span style="font-weight:500">Thaw events:</span> ';
+        html += thaws.map(function(t){
+          return '<span style="font-family:monospace;color:'+AC['thaw']+'">'+t.id+'</span> ('+t.date+(t.user?' • '+t.user:'')+')';
+        }).join(', ');
+        html += '</div>';
+      }
+
+      if(f.note) html += '<div style="font-size:11px;color:var(--tx2);margin-top:6px">' + esc(f.note) + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+
+  body.innerHTML = html || '<div style="font-size:13px;color:var(--tx2);padding:20px 0">No freeze records match the current filter.</div>';
+}
+
+
+// ── Growth curves ─────────────────────────────────────────────────────────────
+
+function sciToNum(s){
+  if(!s)return null;
+  const n=parseFloat(String(s).replace(/[×x\*]/g,'e').replace(/\u00d7/g,'e').replace(/\s/g,''));
+  return isNaN(n)?null:n;
+}
+
+function doublingTime(c1, c2, days){
+  if(!c1||!c2||!days||days<=0||c2<=c1)return null;
+  return (days * Math.log(2)) / Math.log(c2/c1);
+}
+
+function drawGrowthCurve(line){
+  const lp = passages.filter(p=>p.line===line && p.totalViableCells && sciToNum(p.totalViableCells));
+  if(lp.length < 2) return '';
+
+  // sort by date then passage
+  const pts = lp.map(function(p){
+    return {
+      id: p.id, action: p.action, date: p.date,
+      passageNum: p.passageNum||0, days: p.days||0,
+      count: sciToNum(p.totalViableCells),
+      label: pL(p)
+    };
+  }).filter(p=>p.count).sort(function(a,b){
+    return a.date<b.date?-1:a.date>b.date?1:0;
+  });
+
+  if(pts.length < 2) return '';
+
+  const W=520, H=200, PL=52, PR=16, PT=16, PB=40;
+  const gW=W-PL-PR, gH=H-PT-PB;
+
+  const counts = pts.map(p=>p.count);
+  const minC = Math.min(...counts), maxC = Math.max(...counts);
+  const logMin = Math.log10(minC*0.5), logMax = Math.log10(maxC*2);
+
+  const dates = pts.map(p=>new Date(p.date).getTime());
+  const minD = Math.min(...dates), maxD = Math.max(...dates);
+  const dateRange = maxD - minD || 1;
+
+  function cx(d){ return PL + (new Date(d).getTime()-minD)/dateRange*gW; }
+  function cy(c){ return PT + gH - (Math.log10(c)-logMin)/(logMax-logMin)*gH; }
+
+  let svg = '<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:'+W+'px;display:block;margin-bottom:8px">';
+
+  // grid lines (log scale)
+  const pow10s = [];
+  for(let p=Math.floor(logMin); p<=Math.ceil(logMax); p++) pow10s.push(Math.pow(10,p));
+  pow10s.forEach(function(v){
+    if(v<minC*0.4||v>maxC*2.5)return;
+    const y=cy(v);
+    svg += '<line x1="'+PL+'" y1="'+y+'" x2="'+(W-PR)+'" y2="'+y+'" stroke="#E3E1DB" stroke-width="0.5"/>';
+    const lbl = v>=1e9?Math.round(v/1e9)+'B':v>=1e6?Math.round(v/1e6)+'M':v>=1e3?Math.round(v/1e3)+'K':v;
+    svg += '<text x="'+(PL-4)+'" y="'+(y+4)+'" text-anchor="end" font-size="8" fill="#6B6A65" font-family="system-ui">'+lbl+'</text>';
+  });
+
+  // x axis dates
+  svg += '<line x1="'+PL+'" y1="'+(PT+gH)+'" x2="'+(W-PR)+'" y2="'+(PT+gH)+'" stroke="#C8C6BF" stroke-width="0.5"/>';
+  pts.forEach(function(p, i){
+    const x=cx(p.date), y=PT+gH;
+    if(i===0||i===pts.length-1||i%Math.ceil(pts.length/4)===0){
+      svg += '<text x="'+x+'" y="'+(y+12)+'" text-anchor="middle" font-size="8" fill="#6B6A65" font-family="system-ui">'+p.date.slice(5)+'</text>';
+    }
+  });
+
+  // line
+  const pathD = pts.map(function(p,i){ return (i===0?'M':'L')+cx(p.date).toFixed(1)+','+cy(p.count).toFixed(1); }).join(' ');
+  svg += '<path d="'+pathD+'" fill="none" stroke="'+lc(line,false)+'" stroke-width="2" stroke-linejoin="round"/>';
+
+  // doubling time annotations
+  for(let i=1; i<pts.length; i++){
+    const dt = doublingTime(pts[i-1].count, pts[i].count, pts[i].days);
+    if(dt && dt > 0 && dt < 200){
+      const mx = (cx(pts[i-1].date)+cx(pts[i].date))/2;
+      const my = Math.min(cy(pts[i-1].count), cy(pts[i].count)) - 8;
+      svg += '<text x="'+mx.toFixed(1)+'" y="'+my.toFixed(1)+'" text-anchor="middle" font-size="7.5" fill="#854F0B" font-family="system-ui">DT '+dt.toFixed(1)+'d</text>';
+    }
+  }
+
+  // dots
+  pts.forEach(function(p){
+    const x=cx(p.date), y=cy(p.count);
+    svg += '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="4" fill="'+AC[p.action]+'" stroke="#fff" stroke-width="1.5">';
+    svg += '<title>'+p.label+' ('+p.date+')\n'+p.count.toExponential(2)+' cells</title></circle>';
+    svg += '<text x="'+x.toFixed(1)+'" y="'+(y-8).toFixed(1)+'" text-anchor="middle" font-size="7.5" fill="'+AC[p.action]+'" font-family="system-ui">'+p.label+'</text>';
+  });
+
+  // y axis label
+  svg += '<text x="10" y="'+(PT+gH/2)+'" text-anchor="middle" font-size="8" fill="#6B6A65" font-family="system-ui" transform="rotate(-90,10,'+(PT+gH/2)+')">Total viable cells</text>';
+
+  svg += '</svg>';
+  return svg;
+}
+
+function drawWellCurve(rec){
+  // for experiment records with plate data containing counts over wells
+  if(!rec.plateData) return '';
+  const plates = Object.keys(rec.plateData);
+  if(!plates.length) return '';
+
+  // collect all wells with counts across all plates
+  const wellData = {};
+  plates.forEach(function(pk, pi){
+    const plate = rec.plateData[pk];
+    Object.keys(plate).forEach(function(wid){
+      const w = plate[wid];
+      if(w.count && sciToNum(w.count)){
+        if(!wellData[wid]) wellData[wid] = [];
+        wellData[wid].push({plate: pi+1, count: sciToNum(w.count), cond: w.cond||'', treat: w.treat||''});
+      }
+    });
+  });
+
+  if(!Object.keys(wellData).length) return '';
+
+  const W=520, H=180, PL=52, PR=16, PT=16, PB=36;
+  const gW=W-PL-PR, gH=H-PT-PB;
+
+  const allCounts = Object.values(wellData).flat().map(d=>d.count);
+  const maxC = Math.max(...allCounts)*1.2, minC = Math.min(...allCounts)*0.8;
+
+  function cx(p){ return PL + (p-1)/(plates.length-1||1)*gW; }
+  function cy(c){ return PT + gH - (c-minC)/(maxC-minC||1)*gH; }
+
+  let svg = '<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:'+W+'px;display:block;margin-bottom:8px">';
+
+  // grid
+  [0,0.25,0.5,0.75,1].forEach(function(t){
+    const y=PT+gH*t;
+    const v=maxC-(maxC-minC)*t;
+    svg += '<line x1="'+PL+'" y1="'+y+'" x2="'+(W-PR)+'" y2="'+y+'" stroke="#E3E1DB" stroke-width="0.5"/>';
+    const lbl=v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':v.toFixed(0);
+    svg += '<text x="'+(PL-4)+'" y="'+(y+4)+'" text-anchor="end" font-size="8" fill="#6B6A65" font-family="system-ui">'+lbl+'</text>';
+  });
+
+  // x labels (plate/timepoint numbers)
+  plates.forEach(function(pk, pi){
+    const x=cx(pi+1);
+    svg += '<text x="'+x+'" y="'+(PT+gH+12)+'" text-anchor="middle" font-size="8" fill="#6B6A65" font-family="system-ui">Plate '+(pi+1)+'</text>';
+    svg += '<line x1="'+x+'" y1="'+PT+'" x2="'+x+'" y2="'+(PT+gH)+'" stroke="#E3E1DB" stroke-width="0.5"/>';
+  });
+
+  // a line per well
+  const wellIds = Object.keys(wellData);
+  const colors = ['#185FA5','#0F6E56','#854F0B','#534AB7','#993C1D','#1D9E75','#D85A30'];
+  wellIds.forEach(function(wid, wi){
+    const pts = wellData[wid].sort(function(a,b){return a.plate-b.plate;});
+    if(pts.length<1)return;
+    const col = colors[wi%colors.length];
+    if(pts.length>1){
+      const d = pts.map(function(p,i){return (i===0?'M':'L')+cx(p.plate).toFixed(1)+','+cy(p.count).toFixed(1);}).join(' ');
+      svg += '<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="1.5" stroke-dasharray="none" opacity="0.7"/>';
+    }
+    pts.forEach(function(p){
+      svg += '<circle cx="'+cx(p.plate).toFixed(1)+'" cy="'+cy(p.count).toFixed(1)+'" r="3" fill="'+col+'" stroke="#fff" stroke-width="1">';
+      svg += '<title>Well '+wid+' (Plate '+p.plate+')\n'+p.count.toExponential(2)+' cells'+(p.cond?'\n'+p.cond:'')+(p.treat?'\n'+p.treat:'')+'</title></circle>';
+    });
+    // label at last point
+    const last = pts[pts.length-1];
+    svg += '<text x="'+(cx(last.plate)+5).toFixed(1)+'" y="'+(cy(last.count)+4).toFixed(1)+'" font-size="7.5" fill="'+col+'" font-family="system-ui">'+wid+'</text>';
+  });
+
+  svg += '<text x="10" y="'+(PT+gH/2)+'" text-anchor="middle" font-size="8" fill="#6B6A65" font-family="system-ui" transform="rotate(-90,10,'+(PT+gH/2)+')">Cell count</text>';
+  svg += '</svg>';
+  return svg;
+}
+
+
+function svgToPng(svgEl, callback) {
+  const svgData = new XMLSerializer().serializeToString(svgEl);
+  const svgBlob = new Blob([svgData], {type:'image/svg+xml;charset=utf-8'});
+  const url = URL.createObjectURL(svgBlob);
+  const img = new Image();
+  img.onload = function(){
+    const canvas = document.createElement('canvas');
+    const scale = 3; // 3x for high-res
+    canvas.width = svgEl.viewBox.baseVal.width * scale;
+    canvas.height = svgEl.viewBox.baseVal.height * scale;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.scale(scale, scale);
+    ctx.drawImage(img, 0, 0);
+    URL.revokeObjectURL(url);
+    callback(canvas);
+  };
+  img.src = url;
+}
+
+function downloadGC(line) {
+  const lineName = line;
+  const wrap = document.getElementById('gc-svg-'+line);
+  if(!wrap) return;
+  const svgEl = wrap.querySelector('svg');
+  if(!svgEl) { toast('Open the chart first'); return; }
+  svgToPng(svgEl, function(canvas){
+    const a = document.createElement('a');
+    a.download = line.replace(/[^a-z0-9]/gi,'_')+'_growth_curve_'+tod()+'.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+    toast('Downloaded growth curve for '+line);
+  });
+}
+
+function copyGC(line) {
+  const wrap = document.getElementById('gc-svg-'+line);
+  if(!wrap){toast('Chart not found');return;}
+  const svgEl = wrap.querySelector('svg');
+  if(!svgEl){toast('No chart to copy');return;}
+  svgToPng(svgEl, function(canvas){
+    canvas.toBlob(function(blob){
+      if(!blob){toast('Could not generate image');return;}
+      if(!navigator.clipboard||!window.ClipboardItem){
+        // fallback to download
+        const a=document.createElement('a');
+        a.download=line.replace(/[^a-z0-9]/gi,'_')+'_growth_curve.png';
+        a.href=URL.createObjectURL(blob);a.click();
+        toast('Copied not supported — downloaded instead');return;
+      }
+      navigator.clipboard.write([new ClipboardItem({'image/png':blob})])
+        .then(function(){toast('Chart copied — paste into PowerPoint, Keynote or Slides');})
+        .catch(function(){
+          const a=document.createElement('a');
+          a.download=line.replace(/[^a-z0-9]/gi,'_')+'_growth_curve.png';
+          a.href=URL.createObjectURL(blob);a.click();
+          toast('Clipboard blocked — downloaded instead');
+        });
+    },'image/png');
+  });
+}
+
+
+// ── Confluency integration ────────────────────────────────────────────────────
+
+function saveConfluencyURL() {
+  const url = (document.getElementById('conf-api-url')||{}).value||'';
+  const base = (document.getElementById('conf-base-folder')||{}).value||'';
+  fetch('/save-settings', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({confluency_api_url: url.trim(), confluency_base_folder: base.trim()})
+  }).then(r=>r.json()).then(function(d){
+    const el = document.getElementById('conf-api-status');
+    if(d.ok) {
+      el.textContent = 'Saved.';
+      el.style.color = '#0F6E56';
+      if(url.trim()) { el.textContent = 'Saved. Testing connection...'; testConfluencyConnection(url.trim(), el); }
+      updateBaseFolderPreview();
+    } else {
+      el.textContent = 'Error: ' + (d.error||'unknown');
+      el.style.color = '#A32D2D';
+    }
+  }).catch(function(e){
+    const el = document.getElementById('conf-api-status');
+    if(el) el.textContent = 'Server error: ' + e.message;
+  });
+}
+
+function updateBaseFolderPreview() {
+  const el = document.getElementById('conf-base-preview');
+  const inp = document.getElementById('conf-base-folder');
+  if(!el || !inp) return;
+  const base = inp.value.trim();
+  if(!base) { el.textContent = ''; return; }
+  const sep = base.endsWith('/') || base.endsWith('\\') ? '' : '/';
+  el.textContent = 'Example: ' + base + sep + 'EXP-LS001-003/';
+}
+
+function autoImageFolder(rec) {
+  // Build the auto-suggested folder path from base + record/experiment ID
+  const base = window._confBaseFolder || '';
+  if(!base) return '';
+  const sep = base.endsWith('/') || base.endsWith('\\') ? '' : '/';
+  const id = rec.expId || rec.id || '';
+  return base + sep + id + '/';
+}
+
+function testConfluencyConnection(url, statusEl) {
+  if(!url) return;
+  fetch(url + '/health').then(r=>r.json()).then(function(d){
+    if(d.status === 'ok') {
+      statusEl.textContent = '✅ Connected to confluency API';
+      statusEl.style.color = '#0F6E56';
+    } else {
+      statusEl.textContent = 'Unexpected response from API';
+      statusEl.style.color = '#A32D2D';
+    }
+  }).catch(function(){
+    statusEl.textContent = '⚠ Could not reach API — check URL and that confluency_api.py is running';
+    statusEl.style.color = '#854F0B';
+  });
+}
+
+function loadConfluencySettings() {
+  fetch('/get-settings').then(r=>r.json()).then(function(d){
+    const el = document.getElementById('conf-api-url');
+    if(el && d.confluency_api_url) el.value = d.confluency_api_url;
+    const bl = document.getElementById('conf-base-folder');
+    if(bl && d.confluency_base_folder) bl.value = d.confluency_base_folder;
+    window._confBaseFolder = d.confluency_base_folder || '';
+    updateBaseFolderPreview();
+  }).catch(function(){});
+}
+
+function openConfluencyPanel() {
+  const panel = document.getElementById('conf-panel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+function runConfluencyAnalysis() {
+  const folder = document.getElementById('conf-folder').value.trim();
+  const thresh = parseInt(document.getElementById('conf-thresh').value) || -36;
+  const hole = parseInt(document.getElementById('conf-hole').value) || 200;
+  const dead = parseInt(document.getElementById('conf-dead').value) || 180;
+  const statusEl = document.getElementById('conf-status');
+
+  if(!folder) { statusEl.textContent = 'Enter a folder path'; return; }
+
+  statusEl.textContent = 'Analyzing... this may take a moment';
+  statusEl.style.color = 'var(--tx2)';
+
+  fetch('/proxy-confluency', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      folder: folder,
+      threshold_offset: thresh,
+      min_hole_size: hole,
+      dead_cell_threshold: dead
+    })
+  }).then(r=>r.json()).then(function(data){
+    if(data.error) {
+      statusEl.textContent = '❌ ' + data.error;
+      statusEl.style.color = '#A32D2D';
+      return;
+    }
+    applyConfluencyResults(data);
+    const s = data.summary;
+    statusEl.textContent = '✅ Done — ' + s.analyzed + ' images, avg ' + s.avg_confluency + '% confluency';
+    statusEl.style.color = '#0F6E56';
+    document.getElementById('conf-panel').style.display = 'none';
+    toast('Confluency applied to ' + s.analyzed + ' wells');
+  }).catch(function(e){
+    statusEl.textContent = '❌ ' + e.message;
+    statusEl.style.color = '#A32D2D';
+  });
+}
+
+function applyConfluencyResults(data) {
+  // Apply per-well confluency to PM.wells and the record
+  const results = data.results || [];
+  let recAvg = null;
+  const wellConfs = [];
+
+  results.forEach(function(r) {
+    if(!r.well || !('confluency' in r)) return;
+    const wid = r.well;
+    // write to PM.wells
+    const w = getPW(wid);
+    w.confluency = r.confluency;
+    w.occupied = true;
+    // also store in cond if empty, so it shows in plate grid
+    if(!w.cond) w.cond = 'Confluency: ' + r.confluency + '%';
+    wellConfs.push(r.confluency);
+  });
+
+  if(wellConfs.length) {
+    recAvg = Math.round(wellConfs.reduce(function(a,b){return a+b;},0) / wellConfs.length * 10) / 10;
+  }
+
+  // save to record
+  const rec = passages.find(function(p){return p.id===PM.recId;});
+  if(rec) {
+    if(!rec.plateData) rec.plateData = {};
+    if(!rec.plateData[PM.vesselKey]) rec.plateData[PM.vesselKey] = {};
+    results.forEach(function(r){
+      if(!r.well||!('confluency' in r)) return;
+      if(!rec.plateData[PM.vesselKey][r.well]) rec.plateData[PM.vesselKey][r.well] = {};
+      rec.plateData[PM.vesselKey][r.well].confluency = r.confluency;
+      rec.plateData[PM.vesselKey][r.well].occupied = true;
+    });
+    // set record-level confluency to average
+    if(recAvg !== null) rec.confluency = recAvg;
+  }
+
+  // re-render plate grid to show updated wells
+  renderPGrid();
+  renderPSum();
+}
+
+
+function generateExpReport() {
+  const recId = MS.editId;
+  if(!recId){ toast('Save the record first'); return; }
+  const rec = passages.find(function(p){return p.id===recId;});
+  if(!rec){ toast('Record not found'); return; }
+
+  // use saved imageFolder, allow override
+  const savedFolder = rec.imageFolder || '';
+  const folder = prompt(
+    'Image folder path (network drive):\nPre-filled from record — edit if needed, or leave blank for no images.',
+    savedFolder
+  );
+  if(folder === null) return; // cancelled
+
+  toast('Generating report… this may take a few seconds');
+
+  const payload = JSON.stringify({
+    rec: rec,
+    passages: passages,
+    imageFolder: folder.trim() || null,
+  });
+
+  fetch('/generate-report', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: payload,
+  }).then(function(r){
+    if(!r.ok) return r.json().then(function(d){ throw new Error(d.error||'Failed'); });
+    return r.blob();
+  }).then(function(blob){
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = (rec.expId||rec.id).replace(/[^a-z0-9_-]/gi,'_') + '_report.pptx';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('Report downloaded — open in PowerPoint or Keynote');
+  }).catch(function(e){
+    toast('❌ Report failed: ' + e.message);
+    console.error(e);
   });
 }
 
