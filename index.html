@@ -501,7 +501,37 @@ const PLATE_ROWS={6:2,12:3,24:4,48:6,96:8,384:16};
 const PLATE_COLS={6:3,12:4,24:6,48:8,96:12,384:24};
 const PLATE_WS={6:60,12:48,24:38,48:30,96:24,384:14};
 const PLATE_RL='ABCDEFGHIJKLMNOP';
-const FA={T25:25,T75:75,T150:150,T175:175,T225:225,T300:300,T500:500,HYPERFlask:1720,'Roller bottle':850,'Dish 35mm':8,'Dish 60mm':21,'Dish 100mm':55,'Dish 150mm':145};
+// ── Vessel specifications table ─────────────────────────────────────────────
+// area: cm², vol: mL working volume, wells: number of wells (plates only)
+const VESSEL_SPECS = {
+  // Flasks
+  'T25':          {area:25,    vol:7,    type:'flask'},
+  'T75':          {area:75,    vol:15,   type:'flask'},
+  'T150':         {area:150,   vol:30,   type:'flask'},
+  'T175':         {area:175,   vol:35,   type:'flask'},
+  'T225':         {area:225,   vol:45,   type:'flask'},
+  'T300':         {area:300,   vol:60,   type:'flask'},
+  'T500':         {area:500,   vol:100,  type:'flask'},
+  'HYPERFlask':   {area:1720,  vol:550,  type:'flask'},
+  'Roller bottle':{area:850,   vol:250,  type:'flask'},
+  // Dishes
+  'Dish 35mm':    {area:8,     vol:2,    type:'dish'},
+  'Dish 60mm':    {area:21,    vol:5,    type:'dish'},
+  'Dish 100mm':   {area:55,    vol:10,   type:'dish'},
+  'Dish 150mm':   {area:145,   vol:20,   type:'dish'},
+  // Suspension
+  'Spinner flask':{area:null,  vol:100,  type:'suspension'},
+  // Plates (area and vol per well)
+  '6-well plate':    {area:9.5,   vol:2,    wells:6,   type:'plate'},
+  '12-well plate':   {area:3.8,   vol:1,    wells:12,  type:'plate'},
+  '24-well plate':   {area:1.9,   vol:0.5,  wells:24,  type:'plate'},
+  '48-well plate':   {area:0.95,  vol:0.25, wells:48,  type:'plate'},
+  '96-well plate':   {area:0.32,  vol:0.1,  wells:96,  type:'plate'},
+  '384-well plate':  {area:0.056, vol:0.025,wells:384, type:'plate'},
+};
+// Derived lookup maps for backwards compatibility
+const FA = Object.fromEntries(Object.entries(VESSEL_SPECS).filter(([k,v])=>v.area&&v.type!=='plate').map(([k,v])=>[k,v.area]));
+
 
 // ── state ──
 let passages=[];
@@ -973,7 +1003,7 @@ function openPMThawNew(vesselType){
 }
 
 // ── vessel list (passage) ──
-function addV(type,qty,seeding,seedingTotal){VL.push({id:'v'+Date.now()+Math.random().toString(36).slice(2,5),type:type||'',qty:qty||1,seeding:seeding||'',seedingTotal:seedingTotal||'',custom:'',cond:'',treat:''});renderVL();}
+function addV(type,qty,seeding,seedingTotal){VL.push({id:'v'+Date.now()+Math.random().toString(36).slice(2,5),type:type||'',qty:qty||1,seeding:seeding||'',seedingTotal:seedingTotal||'',custom:'',cond:'',treat:'',wellsSeeded:1,seedingUnit:''});renderVL();}
 function remV(id){VL=VL.filter(v=>v.id!==id);renderVL();}
 function updVF(id,field,val){const v=VL.find(v=>v.id===id);if(!v)return;if(field==='qty')v.qty=Math.max(1,parseInt(val)||1);else if(field==='wellsSeeded')v.wellsSeeded=parseInt(val)||1;else v[field]=val;if(field==='type')renderVL();else updVSum();}
 
@@ -1054,24 +1084,32 @@ function renderVL(){
     if(ht){
       if(ip){
         // PLATE: density/well + wells seeded + auto-total
-        const densUnit='cells/cm\u00b2';
+        // PLATE: density/well + wells seeded + auto-total
         body+='<div class="seed-row">'
-          +'<div class="fr"><label style="font-size:11px;color:var(--tx2)">Seeding density (cells/cm\u00b2) <span class="ot">per well</span></label>'
+          +'<div class="fr"><label style="font-size:11px;color:var(--tx2);display:flex;align-items:center;justify-content:space-between">'
+          +'<span>Seeding density <span class="ot">per well</span></span>'
+          +'<select id="vs-unit-'+v.id+'" onchange="updVF(\''+v.id+'\',\'seedingUnit\',this.value);autoCalcVesselTotal(\''+v.id+'\')" style="font-size:10px;padding:2px 4px;border:0.5px solid var(--bd2);border-radius:3px;background:var(--bg);color:var(--tx2);font-family:inherit">'
+          +'<option value="cells/cm\u00b2"'+((!v.seedingUnit||v.seedingUnit==='cells/cm\u00b2')?' selected':'')+'>cells/cm\u00b2</option>'
+          +'<option value="cells/mL"'+(v.seedingUnit==='cells/mL'?' selected':'')+'>cells/mL</option>'
+          +'<option value="cells/well"'+(v.seedingUnit==='cells/well'?' selected':'')+'>cells/well</option>'
+          +'</select></label>'
+          +'<div style="font-size:10px;color:var(--tx2);margin-top:2px" id="vs-specs-'+v.id+'">'
+          +(function(){var sp=VESSEL_SPECS[v.type]||{};var parts=[];if(sp.area)parts.push('Area: '+sp.area+' cm\u00b2/well');if(sp.vol)parts.push('Vol: '+sp.vol+' mL/well');if(sp.wells)parts.push('Wells: '+sp.wells);return parts.join(' \u00b7 ');})()
+          +'</div>'
           +'<div style="display:flex;gap:4px;align-items:center">'
           +'<input type="text" id="vs-d-'+v.id+'" value="'+esc(v.seeding||'')+'" placeholder="e.g. 5\u00d710\u00b3" oninput="updVF(\''+v.id+'\',\'seeding\',this.value);sciPreview(\'vs-d-'+v.id+'\',\'vs-dp-'+v.id+'\');autoCalcVesselTotal(\''+v.id+'\')" style="font-size:12px;padding:5px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%">'
           +'<button class="sci-btn" onclick="sciConvert(\'vs-d-'+v.id+'\',\'vs-dp-'+v.id+'\');updVF(\''+v.id+'\',\'seeding\',document.getElementById(\'vs-d-'+v.id+'\').value);autoCalcVesselTotal(\''+v.id+'\')" type="button">sci</button>'
           +'</div><div class="sci-preview" id="vs-dp-'+v.id+'"></div>'
-          +'<div class="wells-seeded-row">Wells seeded: <input type="number" min="1" id="vs-w-'+v.id+'" value="'+(v.wellsSeeded||1)+'" oninput="updVF(\''+v.id+'\',\'wellsSeeded\',this.value);autoCalcVesselTotal(\''+v.id+'\')"> of '+({'6-well plate':6,'12-well plate':12,'24-well plate':24,'48-well plate':48,'96-well plate':96,'384-well plate':384}[v.type]||6)+' wells</div>'
+          +'<div class="wells-seeded-row">Wells seeded: <input type="number" min="1" id="vs-w-'+v.id+'" value="'+(v.wellsSeeded||1)+'" oninput="updVF(\''+v.id+'\',\'wellsSeeded\',this.value);autoCalcVesselTotal(\''+v.id+'\')">' +' of '+(VESSEL_SPECS[v.type]&&VESSEL_SPECS[v.type].wells||{'6-well plate':6,'12-well plate':12,'24-well plate':24,'48-well plate':48,'96-well plate':96,'384-well plate':384}[v.type]||6)+' wells</div>'
           +'</div>'
           +'<div class="fr"><label style="font-size:11px;color:var(--tx2)">Total cells seeded <span class="at">auto</span></label>'
           +'<div id="vs-tw-'+v.id+'" style="display:flex;gap:4px;align-items:center">'
           +'<input type="text" id="vs-t-'+v.id+'" value="'+esc(v.seedingTotal||'')+'" placeholder="auto-calculated" oninput="updVF(\''+v.id+'\',\'seedingTotal\',this.value);sciPreview(\'vs-t-'+v.id+'\',\'vs-tp-'+v.id+'\');checkSeedingAlert(\'pass\')" style="font-size:12px;padding:5px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%">'
           +'<button class="sci-btn" onclick="sciConvert(\'vs-t-'+v.id+'\',\'vs-tp-'+v.id+'\');updVF(\''+v.id+'\',\'seedingTotal\',document.getElementById(\'vs-t-'+v.id+'\').value);checkSeedingAlert(\'pass\')" type="button">sci</button>'
           +'</div><div class="sci-preview" id="vs-tp-'+v.id+'">'+sciPrevT+'</div>'
-          +(MS.editId||MS._tempId?'<button class="plate-btn" style="margin-top:4px" onclick="openPMPassage(\'v_'+v.id+'\',\''+v.type+'\')">\u26f6 Per-well detail</button>':'')
+          +(MS.editId||MS._tempId?'<button class="plate-btn" style="margin-top:4px" onclick="openPMPassage(\'v_'+v.id+'\',\''+v.type+'\')">⛶ Per-well detail</button>':'')
           +'</div>'
           +'</div>';
-          +'<div class="seed-row" style="margin-top:6px">'
           +'<div class="fr"><label style="font-size:11px;color:var(--tx2)">Condition</label>'
           +'<input type="text" value="'+esc(v.cond||'')+'" placeholder="e.g. +iROCK" oninput="updVF(\''+v.id+'\',\'cond\',this.value)" style="font-size:12px;padding:5px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%"></div>'
           +'<div class="fr"><label style="font-size:11px;color:var(--tx2)">Treatment</label>'
@@ -1079,10 +1117,10 @@ function renderVL(){
           +'</div>';
       } else {
         // FLASK/DISH: density + auto-total
-        const densLabel=susp?'Cells / mL':'Cells / cm\u00b2';
+        const densLabel=susp?'Cells / mL':'Cells / cm²';
         const autoHint=flaskArea&&v.seeding&&sciToNum(v.seeding)?'\u2248 '+fmtCells(sciToNum(v.seeding)*flaskArea*(parseInt(v.qty)||1))+' cells total':'';
         body+='<div class="seed-row">'
-          +'<div class="fr"><label style="font-size:11px;color:var(--tx2)">'+densLabel+' <span class="ot">optional</span></label>'
+          +'<div class="fr"><label style="font-size:11px;color:var(--tx2);display:flex;align-items:center;justify-content:space-between"><span>Seeding density <span class="ot">optional</span></span>'+'<select id="vs-unit-'+v.id+'" onchange="updVF(\''+v.id+'\',\'seedingUnit\',this.value)" style="font-size:10px;padding:2px 4px;border:0.5px solid var(--bd2);border-radius:3px;background:var(--bg);color:var(--tx2);font-family:inherit">'+'<option value="cells/cm²"'+((!v.seedingUnit||v.seedingUnit==='cells/cm²')&&!susp?' selected':'')+'>cells/cm²</option>'+'<option value="cells/mL"'+(v.seedingUnit==='cells/mL'||susp?' selected':'')+'>cells/mL</option>'+'<option value="cells/well"'+(v.seedingUnit==='cells/well'?' selected':'')+'>cells/well</option>'+'</select></label>'+'<div style="font-size:10px;color:var(--tx2);margin-top:2px" id="vs-specs-'+v.id+'">'+(function(){var sp=VESSEL_SPECS[v.type]||{};var parts=[];if(sp.area)parts.push('Area: '+sp.area+' cm²');if(sp.vol)parts.push('Vol: '+sp.vol+' mL');if(sp.wells)parts.push('Wells: '+sp.wells);return parts.join(' · ');})()+'</div>'
           +'<div style="display:flex;gap:4px;align-items:center">'
           +'<input type="text" id="vs-d-'+v.id+'" value="'+esc(v.seeding||'')+'" placeholder="e.g. 5000" oninput="updVF(\''+v.id+'\',\'seeding\',this.value);sciPreview(\'vs-d-'+v.id+'\',\'vs-dp-'+v.id+'\');autoCalcVesselTotal(\''+v.id+'\')" style="font-size:12px;padding:5px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%">'
           +'<button class="sci-btn" onclick="sciConvert(\'vs-d-'+v.id+'\',\'vs-dp-'+v.id+'\');updVF(\''+v.id+'\',\'seeding\',document.getElementById(\'vs-d-'+v.id+'\').value);autoCalcVesselTotal(\''+v.id+'\')" type="button">sci</button>'
@@ -1126,28 +1164,55 @@ function autoCalcVesselTotal(vid) {
   const densEl = document.getElementById('vs-d-'+vid);
   const density = densEl ? sciToNum(densEl.value) : sciToNum(v.seeding);
   const totalEl = document.getElementById('vs-t-'+vid);
-  const wrapEl  = document.getElementById('vs-tw-'+vid);
-  if(!density || density<=0){ return; }
+  if(!density || density<=0) return;
 
+  const unit = v.seedingUnit || (isPlate(v.type) ? 'cells/cm²' : (v.type==='Spinner flask' ? 'cells/mL' : 'cells/cm²'));
+  const specs = VESSEL_SPECS[v.type] || {};
   let total = null;
-  if(isPlate(v.type)){
-    const area = WELL_AREA[v.type]||9.5;
-    const wellsEl = document.getElementById('vs-w-'+vid);
-    const wells = wellsEl ? (parseInt(wellsEl.value)||1) : (parseInt(v.wellsSeeded)||1);
-    total = density * area * wells * qty;
-  } else {
-    const area = FA[v.type];
-    if(area) total = density * area * qty;
+
+  if(unit === 'cells/cm²') {
+    if(isPlate(v.type)) {
+      const area = specs.area || WELL_AREA[v.type] || 9.5;
+      const wellsEl = document.getElementById('vs-w-'+vid);
+      const wells = wellsEl ? (parseInt(wellsEl.value)||1) : (parseInt(v.wellsSeeded)||1);
+      total = density * area * wells * qty;
+    } else {
+      const area = specs.area || FA[v.type];
+      if(area) total = density * area * qty;
+    }
+  } else if(unit === 'cells/mL') {
+    const vol = specs.vol || 0;
+    if(!vol) return; // no volume data
+    if(isPlate(v.type)) {
+      const wellsEl = document.getElementById('vs-w-'+vid);
+      const wells = wellsEl ? (parseInt(wellsEl.value)||1) : (parseInt(v.wellsSeeded)||1);
+      total = density * vol * wells * qty;
+    } else {
+      total = density * vol * qty;
+    }
+  } else if(unit === 'cells/well') {
+    if(isPlate(v.type)) {
+      const wellsEl = document.getElementById('vs-w-'+vid);
+      const wells = wellsEl ? (parseInt(wellsEl.value)||1) : (specs.wells||1);
+      total = density * wells * qty;
+    } else {
+      total = density * qty; // per vessel
+    }
   }
-  if(total && totalEl){
+
+  if(total && totalEl) {
     const sci = toSci(Math.round(total).toString());
     totalEl.value = sci;
     updVF(vid,'seedingTotal',sci);
-    const prevEl = document.getElementById('vs-tp-'+vid);
-    if(prevEl) prevEl.textContent = '';
-    if(wrapEl) wrapEl.classList.remove('seed-total-over');
+    sciPreview('vs-t-'+vid,'vs-tp-'+vid);
+    checkSeedingAlert('pass');
   }
-  checkSeedingAlert('pass');
+  // show hint in auto-calc preview
+  const hintEl = document.getElementById('vs-dp-'+vid);
+  if(hintEl && total) {
+    const unitDisp = unit==='cells/cm²' ? (specs.area||FA[v.type]||'?')+' cm²' : unit==='cells/mL' ? (specs.vol||'?')+' mL' : (specs.wells||'?')+' wells';
+    hintEl.innerHTML = (densEl&&densEl.value ? '= '+toSci(densEl.value)+' ' : '') + '<span style="color:var(--green);margin-left:4px">≈ '+fmtCells(total)+' cells total ('+unitDisp+' × '+qty+')</span>';
+  }
 }
 
 // also update updVF to store wellsSeeded
@@ -1474,7 +1539,7 @@ function openF(pid,action){
 +'<div class="fr"><label style="display:flex;align-items:center;gap:6px">&#129514; Confluency analysis folder <span style="font-weight:400;font-size:10px;color:var(--tx2)">network path — used for automated confluency analysis only</span></label><input id="fimgdir" value="'+esc(d.imageFolder||'')+'" placeholder="e.g. //server/share/'+((d.expId||d.id)||'EXP-001')+'/" style="font-family:monospace;font-size:11px"></div><div style="font-size:10px;color:var(--tx2);margin-top:2px;margin-bottom:6px">&#9432; Used only for automated confluency analysis via the ⚪ Analyze confluency button in the plate viewer. Not for image thumbnails or reports.</div>'
       +'<div class="fr"><label>Notes</label><textarea id="fn" placeholder="Authentication, mycoplasma, STR profile...">'+esc(d.note||'')+'</textarea></div>';
   } else if(act==='passage'){
-    if(isE&&d.vessels&&d.vessels.length){d.vessels.forEach(v=>VL.push({id:v.id||('v'+Date.now()+Math.random().toString(36).slice(2,5)),type:v.type,qty:v.qty||1,seeding:v.seeding||'',seedingTotal:v.seedingTotal||'',custom:'',cond:v.cond||'',treat:v.treat||''}));}
+    if(isE&&d.vessels&&d.vessels.length){d.vessels.forEach(v=>VL.push({id:v.id||('v'+Date.now()+Math.random().toString(36).slice(2,5)),type:v.type,qty:v.qty||1,seeding:v.seeding||'',seedingTotal:v.seedingTotal||'',custom:'',cond:v.cond||'',treat:v.treat||'',wellsSeeded:v.wellsSeeded||1,seedingUnit:v.seedingUnit||''}));}
     body+='<div class="fsec">Passage details</div><div class="fg">'
       +'<div class="fr"><label>Passage date</label><input id="fdt" type="date" value="'+esc(d.date||'')+'" oninput="onDC()"></div>'
       +dR(d.days)
@@ -1581,8 +1646,50 @@ function updTP(){const el=document.getElementById('fp'),pv=document.getElementBy
 
 function getThawWells(){const sel=document.getElementById('fw');const val=sel?sel.value:'';return val==='Custom...'?fv('fw-custom'):val;}
 
+function showFieldError(id, msg) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.style.borderColor = '#E53935';
+  el.style.outline = '2px solid #FFCDD2';
+  el.placeholder = msg || 'Required';
+  el.focus();
+  setTimeout(function(){ el.style.borderColor=''; el.style.outline=''; }, 3000);
+}
+
+function validateForm(act) {
+  const errors = [];
+  // Date — required for all forms
+  const dateEl = document.getElementById('fdt');
+  if(dateEl && !dateEl.value.trim()) {
+    showFieldError('fdt', 'Date is required');
+    errors.push('date');
+  }
+  // Cell line — required for thaw/inherit only (others inherit from parent)
+  if(act === 'thaw' || act === 'inherit') {
+    const lineEl = document.getElementById('fl');
+    if(lineEl && !lineEl.value.trim()) {
+      showFieldError('fl', 'Cell line is required');
+      errors.push('line');
+    }
+  }
+  // Operator — required for all
+  const op = getOperatorValue();
+  if(!op || !op.trim()) {
+    const sel = document.getElementById('f-operator');
+    if(sel) { sel.style.borderColor='#E53935'; sel.style.outline='2px solid #FFCDD2'; setTimeout(function(){sel.style.borderColor='';sel.style.outline='';},3000); }
+    errors.push('operator');
+  }
+  if(errors.length) {
+    toast('⚠ Please fill in required fields: ' + errors.join(', '));
+    return false;
+  }
+  return true;
+}
+
 function subF(){
   const ms=MS;const par=ms.parentId?passages.find(p=>p.id===ms.parentId):null;
+  const _act = ms.mode==='edit' ? (passages.find(p=>p.id===ms.editId)||{}).action : ms.action;
+  if(!validateForm(_act)) return;
   if(ms.mode==='edit'){
     const n=passages.find(p=>p.id===ms.editId);if(!n){closeM();return;}
     const act=n.action;
@@ -2094,10 +2201,7 @@ function sciToNum(s) {
 }
 
 // surface area per well (cm²) for each plate format
-const WELL_AREA = {
-  '6-well plate':9.5,'12-well plate':3.8,'24-well plate':1.9,
-  '48-well plate':0.95,'96-well plate':0.32,'384-well plate':0.056
-};
+const WELL_AREA = Object.fromEntries(Object.entries(VESSEL_SPECS).filter(([k,v])=>v.type==='plate').map(([k,v])=>[k,v.area]));
 
 function getSeededCells(rec) {
   // 1. top-level seedingTotal (explicit total cells seeded)
@@ -2547,9 +2651,13 @@ function subDiscontinued(parentId) {
 
 
 function operatorSelectHTML(selectedVal) {
+  // If no lab members configured, show a plain text input
+  if(!labMembers.length) {
+    return '<input id="f-operator" class="operator-select" placeholder="Enter your name" value="'+( selectedVal||'')+'" style="font-size:13px;padding:7px 9px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%">'
+      + '<div style="font-size:10px;color:var(--tx2);margin-top:3px">Add lab members in Import/Export tab to use a dropdown</div>';
+  }
   const opts = '<option value="">-- Select operator --</option>'
     + labMembers.map(function(m){
-        const v = m.name + (m.email ? ' <'+m.email+'>' : '');
         const disp = m.name + (m.email ? ' ('+m.email+')' : '');
         return '<option value="'+m.name+'"'+(selectedVal===m.name?' selected':'')+'>'+disp+'</option>';
       }).join('')
@@ -2557,7 +2665,7 @@ function operatorSelectHTML(selectedVal) {
   return '<select id="f-operator" class="operator-select" onchange="handleOperatorSelect(this)" style="font-size:13px;padding:7px 9px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%">'
     + opts + '</select>'
     + '<input id="f-operator-other" placeholder="Name or email..." style="display:none;margin-top:6px;font-size:13px;padding:7px 9px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-family:inherit;width:100%"'
-    + (labMembers.some(function(m){return m.name===selectedVal;})?'':' value="'+selectedVal+'"') + '>';
+    + (labMembers.some(function(m){return m.name===selectedVal;})?'':' value="'+(selectedVal||'')+'"') + '>';
 }
 
 function handleOperatorSelect(sel) {
@@ -2574,6 +2682,8 @@ function handleOperatorSelect(sel) {
 function getOperatorValue() {
   const sel = document.getElementById('f-operator');
   if(!sel) return fv('fu') || '';
+  // plain text input (no lab members configured)
+  if(sel.tagName === 'INPUT') return sel.value.trim();
   if(sel.value === '__other__' || sel.value === '') {
     const other = document.getElementById('f-operator-other');
     return other ? other.value.trim() : '';
@@ -3073,11 +3183,6 @@ function renderLN2() {
 
 // ── Growth curves ─────────────────────────────────────────────────────────────
 
-function sciToNum(s){
-  if(!s)return null;
-  const n=parseFloat(String(s).replace(/[×x\*]/g,'e').replace(/\u00d7/g,'e').replace(/\s/g,''));
-  return isNaN(n)?null:n;
-}
 
 function doublingTime(c1, c2, days){
   if(!c1||!c2||!days||days<=0||c2<=c1)return null;
